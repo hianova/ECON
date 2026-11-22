@@ -747,7 +747,7 @@ int econ_cert_write_json(const char *out_path, const econ_cert_record_t *rec) {
         write_i64_matrix(fp, "clear_pi_scaled_int", rec->clear_n_banks, rec->clear_n_banks,
                          ECON_CERT_MAX_BANKS, rec->clear_pi_scaled, 1);
     }
-    fprintf(fp, "  \"has_mech\": %d%s\n", rec->has_mech, rec->has_mech ? "," : "");
+    fprintf(fp, "  \"has_mech\": %d,\n", rec->has_mech);
     if (rec->has_mech) {
         fprintf(fp, "  \"mech_mode\": %d,\n", rec->mech_mode);
         fprintf(fp, "  \"mech_scale\": %" PRId64 ",\n", rec->mech_scale);
@@ -759,18 +759,93 @@ int econ_cert_write_json(const char *out_path, const econ_cert_record_t *rec) {
         if (rec->mech_mode == 1) {
             write_i64_matrix(fp, "mech_vals_int", rec->mech_n_agents, rec->mech_n_outcomes,
                              ECON_CERT_MAX_OUT, rec->mech_vals, 1);
-            write_i64_array(fp, "mech_pivots_int", rec->mech_n_agents, rec->mech_pivots, 0);
+            write_i64_array(fp, "mech_pivots_int", rec->mech_n_agents, rec->mech_pivots, 1);
         } else if (rec->mech_mode == 2) {
             fprintf(fp, "  \"mech_ms_K\": %d,\n", rec->mech_ms_K);
-            fprintf(fp, "  \"mech_ms_surplus_int\": %" PRId64 "\n", rec->mech_ms_surplus_int);
+            fprintf(fp, "  \"mech_ms_surplus_int\": %" PRId64 ",\n", rec->mech_ms_surplus_int);
         } else {
             fprintf(fp, "  \"mech_fisher_tol\": %" PRId64 ",\n", rec->mech_fisher_tol);
             write_i64_array(fp, "mech_fisher_p_int", rec->mech_n_outcomes, rec->mech_fisher_p, 1);
             write_i64_array(fp, "mech_fisher_e_int", rec->mech_n_outcomes, rec->mech_fisher_e, 1);
             write_i64_array(fp, "mech_fisher_w_int", rec->mech_n_agents, rec->mech_fisher_w, 1);
             write_i64_matrix(fp, "mech_fisher_x_int", rec->mech_n_agents, rec->mech_n_outcomes,
-                             ECON_CERT_MAX_GRID, rec->mech_fisher_x, 0);
+                             ECON_CERT_MAX_GRID, rec->mech_fisher_x, 1);
         }
+    }
+    fprintf(fp, "  \"has_agency\": %d,\n", rec->has_agency);
+    if (rec->has_agency) {
+        fprintf(fp, "  \"ag_n_states\": %d,\n", rec->ag_n_states);
+        fprintf(fp, "  \"ag_alpha\": %" PRId64 ",\n", rec->ag_alpha);
+        fprintf(fp, "  \"ag_beta\": %" PRId64 ",\n", rec->ag_beta);
+        fprintf(fp, "  \"ag_K\": %" PRId64 ",\n", rec->ag_K);
+        fprintf(fp, "  \"ag_D\": %" PRId64 ",\n", rec->ag_D);
+        fprintf(fp, "  \"ag_c_safe\": %" PRId64 ",\n", rec->ag_c_safe);
+        fprintf(fp, "  \"ag_c_risk\": %" PRId64 ",\n", rec->ag_c_risk);
+        fprintf(fp, "  \"ag_ic_margin\": %" PRId64 ",\n", rec->ag_ic_margin);
+        write_i64_array(fp, "ag_p_safe_int", rec->ag_n_states, rec->ag_p_safe, 1);
+        write_i64_array(fp, "ag_p_risk_int", rec->ag_n_states, rec->ag_p_risk, 1);
+        write_i64_array(fp, "ag_R_int", rec->ag_n_states, rec->ag_R, 1);
+        fprintf(fp, "  \"ag_has_cantelli_amp\": %d,\n", rec->ag_has_cantelli_amp);
+        fprintf(fp, "  \"ag_W\": %" PRId64 ",\n", rec->ag_W);
+        fprintf(fp, "  \"ag_delta_safe\": %" PRId64 ",\n", rec->ag_delta_safe);
+        fprintf(fp, "  \"ag_delta_risk\": %" PRId64 ",\n", rec->ag_delta_risk);
+        fprintf(fp, "  \"ag_S2_safe\": %" PRId64 ",\n", rec->ag_S2_safe);
+        fprintf(fp, "  \"ag_S2_risk\": %" PRId64 ",\n", rec->ag_S2_risk);
+    }
+    fprintf(fp, "  \"has_adverse\": %d,\n", rec->has_adverse);
+    if (rec->has_adverse) {
+        fprintf(fp, "  \"adv_n_types\": %d,\n", rec->adv_n_types);
+        fprintf(fp, "  \"adv_k_eq\": %d,\n", rec->adv_k_eq);
+        fprintf(fp, "  \"adv_scale\": %" PRId64 ",\n", rec->adv_scale);
+        fprintf(fp, "  \"adv_r\": %" PRId64 ",\n", rec->adv_r);
+        fprintf(fp, "  \"adv_r_star\": %" PRId64 ",\n", rec->adv_r_star);
+        write_i64_array(fp, "adv_w_int", rec->adv_n_types, rec->adv_w, 1);
+        write_i64_array(fp, "adv_v_int", rec->adv_n_types, rec->adv_v, 1);
+        write_i64_array(fp, "adv_c_int", rec->adv_n_types, rec->adv_c, 1);
+        fprintf(fp, "  \"adv_has_screen\": %d,\n", rec->adv_has_screen);
+        if (rec->adv_has_screen) {
+            fprintf(fp, "  \"adv_scr_scale\": %" PRId64 ",\n", rec->adv_scr_scale);
+            fprintf(fp, "  \"adv_qH\": %" PRId64 ",\n", rec->adv_qH);
+            fprintf(fp, "  \"adv_qL\": %" PRId64 ",\n", rec->adv_qL);
+            fprintf(fp, "  \"adv_cH\": %" PRId64 ",\n", rec->adv_cH);
+            fprintf(fp, "  \"adv_cL\": %" PRId64 ",\n", rec->adv_cL);
+            fprintf(fp, "  \"adv_PH\": %" PRId64 ",\n", rec->adv_PH);
+            fprintf(fp, "  \"adv_PL\": %" PRId64 ",\n", rec->adv_PL);
+            fprintf(fp, "  \"adv_BH\": %" PRId64 ",\n", rec->adv_BH);
+            fprintf(fp, "  \"adv_BL\": %" PRId64 ",\n", rec->adv_BL);
+        }
+    }
+    fprintf(fp, "  \"has_margin\": %d,\n", rec->has_margin);
+    if (rec->has_margin) {
+        fprintf(fp, "  \"mgn_n_accts\": %d,\n", rec->mgn_n_accts);
+        fprintf(fp, "  \"mgn_scale\": %" PRId64 ",\n", rec->mgn_scale);
+        fprintf(fp, "  \"mgn_P0\": %" PRId64 ",\n", rec->mgn_P0);
+        fprintf(fp, "  \"mgn_Pmin\": %" PRId64 ",\n", rec->mgn_Pmin);
+        fprintf(fp, "  \"mgn_alpha\": %" PRId64 ",\n", rec->mgn_alpha);
+        fprintf(fp, "  \"mgn_theta\": %" PRId64 ",\n", rec->mgn_theta);
+        fprintf(fp, "  \"mgn_P_eq\": %" PRId64 ",\n", rec->mgn_P_eq);
+        fprintf(fp, "  \"mgn_bad_debt\": %" PRId64 ",\n", rec->mgn_bad_debt);
+        write_i64_array(fp, "mgn_h_int", rec->mgn_n_accts, rec->mgn_h, 1);
+        write_i64_array(fp, "mgn_d_int", rec->mgn_n_accts, rec->mgn_d, 1);
+        write_i64_array(fp, "mgn_c_int", rec->mgn_n_accts, rec->mgn_c, 1);
+        write_i64_array(fp, "mgn_trig_int", rec->mgn_n_accts, rec->mgn_trig, 1);
+    }
+    fprintf(fp, "  \"has_inst\": %d%s\n", rec->has_inst, rec->has_inst ? "," : "");
+    if (rec->has_inst) {
+        fprintf(fp, "  \"inst_scale\": %" PRId64 ",\n", rec->inst_scale);
+        fprintf(fp, "  \"inst_m_inc\": %" PRId64 ",\n", rec->inst_m_inc);
+        fprintf(fp, "  \"inst_m_dro\": %" PRId64 ",\n", rec->inst_m_dro);
+        fprintf(fp, "  \"inst_m_sys\": %" PRId64 ",\n", rec->inst_m_sys);
+        fprintf(fp, "  \"inst_master\": %" PRId64 ",\n", rec->inst_master);
+        fprintf(fp, "  \"inst_target\": %" PRId64 ",\n", rec->inst_target);
+        fprintf(fp, "  \"inst_c_inc\": %" PRId64 ",\n", rec->inst_c_inc);
+        fprintf(fp, "  \"inst_c_dro\": %" PRId64 ",\n", rec->inst_c_dro);
+        fprintf(fp, "  \"inst_c_sys\": %" PRId64 ",\n", rec->inst_c_sys);
+        fprintf(fp, "  \"inst_d_inc\": %" PRId64 ",\n", rec->inst_d_inc);
+        fprintf(fp, "  \"inst_d_dro\": %" PRId64 ",\n", rec->inst_d_dro);
+        fprintf(fp, "  \"inst_d_sys\": %" PRId64 ",\n", rec->inst_d_sys);
+        fprintf(fp, "  \"inst_repair_cost\": %" PRId64 ",\n", rec->inst_repair_cost);
+        fprintf(fp, "  \"inst_weakest\": \"%s\"\n", rec->inst_weakest);
     }
     fprintf(fp, "}\n");
     fclose(fp);
@@ -1118,6 +1193,178 @@ static int verify_mech_block(const char *buf) {
     return -1;
 }
 
+static econ_i128 pos_i128(econ_i128 x) { return (x > 0) ? x : 0; }
+
+static int verify_agency_block(const char *buf, const char *status) {
+    int64_t ns64 = 0, alpha = 0, beta = 0, K = 0, D = 0, cs = 0, cr = 0, margin = 0, has_amp = 0;
+    if (json_get_i64(buf, "ag_n_states", &ns64) != 0 ||
+        json_get_i64(buf, "ag_alpha", &alpha) != 0 ||
+        json_get_i64(buf, "ag_beta", &beta) != 0 ||
+        json_get_i64(buf, "ag_K", &K) != 0 ||
+        json_get_i64(buf, "ag_D", &D) != 0 ||
+        json_get_i64(buf, "ag_c_safe", &cs) != 0 ||
+        json_get_i64(buf, "ag_c_risk", &cr) != 0 ||
+        json_get_i64(buf, "ag_ic_margin", &margin) != 0 ||
+        json_get_i64(buf, "ag_has_cantelli_amp", &has_amp) != 0) return -1;
+    if (ns64 <= 0 || ns64 > ECON_CERT_MAX_STATES || alpha < 0 || beta < 0) return -1;
+    int ns = (int)ns64;
+    int64_t ps[ECON_CERT_MAX_STATES], pr[ECON_CERT_MAX_STATES], R[ECON_CERT_MAX_STATES];
+    if (json_get_i64_array(buf, "ag_p_safe_int", ns, ps) != 0 ||
+        json_get_i64_array(buf, "ag_p_risk_int", ns, pr) != 0 ||
+        json_get_i64_array(buf, "ag_R_int", ns, R) != 0) return -1;
+    econ_i128 u_safe = -(econ_i128)cs, u_risk = -(econ_i128)cr;
+    for (int s = 0; s < ns; ++s) {
+        if (ps[s] < 0 || pr[s] < 0) return -1;
+        econ_i128 pay = (econ_i128)alpha * pos_i128((econ_i128)R[s] - (econ_i128)K) -
+                        (econ_i128)beta * pos_i128((econ_i128)D - (econ_i128)R[s]);
+        u_safe += (econ_i128)ps[s] * pay;
+        u_risk += (econ_i128)pr[s] * pay;
+    }
+    econ_i128 gap = u_safe - u_risk;
+    if (gap != (econ_i128)margin) return -1;
+    if (strcmp(status, "CERTIFIED") == 0 && margin <= 0) return -1;
+    if ((strcmp(status, "VETOED") == 0 || strcmp(status, "OBSTRUCTION") == 0) && margin > 0) return -1;
+    if (has_amp) {
+        int64_t W = 0, ds = 0, dr = 0, s2s = 0, s2r = 0;
+        if (json_get_i64(buf, "ag_W", &W) != 0 ||
+            json_get_i64(buf, "ag_delta_safe", &ds) != 0 ||
+            json_get_i64(buf, "ag_delta_risk", &dr) != 0 ||
+            json_get_i64(buf, "ag_S2_safe", &s2s) != 0 ||
+            json_get_i64(buf, "ag_S2_risk", &s2r) != 0) return -1;
+        if (W <= 0 || dr <= 0 || dr > ds || s2s < 0 || s2s > s2r) return -1;
+        econ_i128 lhs = (econ_i128)s2s * ((econ_i128)W * (econ_i128)dr * (econ_i128)dr + (econ_i128)s2r);
+        econ_i128 rhs = (econ_i128)s2r * ((econ_i128)W * (econ_i128)ds * (econ_i128)ds + (econ_i128)s2s);
+        if (lhs > rhs) return -1;
+    }
+    return 0;
+}
+
+static int verify_adverse_block(const char *buf, const char *status) {
+    int64_t nt64 = 0, keq64 = 0, scale = 0, r = 0, rstar = 0, has_scr = 0;
+    if (json_get_i64(buf, "adv_n_types", &nt64) != 0 ||
+        json_get_i64(buf, "adv_k_eq", &keq64) != 0 ||
+        json_get_i64(buf, "adv_scale", &scale) != 0 ||
+        json_get_i64(buf, "adv_r", &r) != 0 ||
+        json_get_i64(buf, "adv_r_star", &rstar) != 0 ||
+        json_get_i64(buf, "adv_has_screen", &has_scr) != 0) return -1;
+    if (nt64 <= 0 || nt64 > ECON_CERT_MAX_TYPES || keq64 < 0 || keq64 > nt64 || scale <= 0) return -1;
+    if (r < 0 || r > scale || rstar < 0 || rstar > scale) return -1;
+    int nt = (int)nt64, keq = (int)keq64;
+    int64_t w[ECON_CERT_MAX_TYPES], v[ECON_CERT_MAX_TYPES], c[ECON_CERT_MAX_TYPES];
+    if (json_get_i64_array(buf, "adv_w_int", nt, w) != 0 ||
+        json_get_i64_array(buf, "adv_v_int", nt, v) != 0 ||
+        json_get_i64_array(buf, "adv_c_int", nt, c) != 0) return -1;
+    for (int i = 0; i < nt; ++i) {
+        if (w[i] <= 0 || v[i] < 0) return -1;
+        if (i + 1 < nt && v[i] > v[i + 1]) return -1;
+    }
+    if (keq > 0) {
+        if (r > rstar) return -1;
+        econ_i128 mass = 0, val = 0;
+        for (int i = 0; i < keq; ++i) { mass += w[i]; val += (econ_i128)w[i] * (econ_i128)v[i]; }
+        if (mass <= 0 || val < 0) return -1;
+        for (int i = 0; i < keq; ++i) {
+            if ((econ_i128)c[i] * ((econ_i128)scale * mass) > (econ_i128)(scale - rstar) * val) return -1;
+        }
+        if (strcmp(status, "OBSTRUCTION") == 0 && r <= rstar) return -1;
+    } else {
+        /* Complete M22 unraveling: at every nonempty prefix 1..k, marginal top type k-1 exits */
+        econ_i128 mass = 0, val = 0;
+        for (int k = 1; k <= nt; ++k) {
+            mass += w[k - 1];
+            val += (econ_i128)w[k - 1] * (econ_i128)v[k - 1];
+            if ((econ_i128)(scale - r) * val >= (econ_i128)c[k - 1] * ((econ_i128)scale * mass)) return -1;
+        }
+        if (strcmp(status, "CERTIFIED") == 0) return -1;
+    }
+    if (has_scr) {
+        int64_t sc = 0, qH = 0, qL = 0, cH = 0, cL = 0, PH = 0, PL = 0, BH = 0, BL = 0;
+        if (json_get_i64(buf, "adv_scr_scale", &sc) != 0 ||
+            json_get_i64(buf, "adv_qH", &qH) != 0 || json_get_i64(buf, "adv_qL", &qL) != 0 ||
+            json_get_i64(buf, "adv_cH", &cH) != 0 || json_get_i64(buf, "adv_cL", &cL) != 0 ||
+            json_get_i64(buf, "adv_PH", &PH) != 0 || json_get_i64(buf, "adv_PL", &PL) != 0 ||
+            json_get_i64(buf, "adv_BH", &BH) != 0 || json_get_i64(buf, "adv_BL", &BL) != 0) return -1;
+        if (sc <= 0 || qH < 0 || qH >= qL || BL > BH || PL > PH) return -1;
+        econ_i128 uHH = (econ_i128)sc * (PH - cH) - (econ_i128)qH * BH;
+        econ_i128 uHL = (econ_i128)sc * (PL - cH) - (econ_i128)qH * BL;
+        econ_i128 uLL = (econ_i128)sc * (PL - cL) - (econ_i128)qL * BL;
+        econ_i128 uLH = (econ_i128)sc * (PH - cL) - (econ_i128)qL * BH;
+        if (uHH < 0 || uLL < 0 || uHL > uHH || uLH > uLL) return -1;
+    }
+    return 0;
+}
+
+static int verify_margin_block(const char *buf) {
+    int64_t na64 = 0, scale = 0, P0 = 0, Pmin = 0, alpha = 0, theta = 0, Peq = 0, bad_debt = 0;
+    if (json_get_i64(buf, "mgn_n_accts", &na64) != 0 ||
+        json_get_i64(buf, "mgn_scale", &scale) != 0 ||
+        json_get_i64(buf, "mgn_P0", &P0) != 0 ||
+        json_get_i64(buf, "mgn_Pmin", &Pmin) != 0 ||
+        json_get_i64(buf, "mgn_alpha", &alpha) != 0 ||
+        json_get_i64(buf, "mgn_theta", &theta) != 0 ||
+        json_get_i64(buf, "mgn_P_eq", &Peq) != 0 ||
+        json_get_i64(buf, "mgn_bad_debt", &bad_debt) != 0) return -1;
+    if (na64 <= 0 || na64 > ECON_CERT_MAX_ACCTS || scale <= 0) return -1;
+    int na = (int)na64;
+    int64_t h[ECON_CERT_MAX_ACCTS], d[ECON_CERT_MAX_ACCTS], c[ECON_CERT_MAX_ACCTS], trig[ECON_CERT_MAX_ACCTS];
+    if (json_get_i64_array(buf, "mgn_h_int", na, h) != 0 ||
+        json_get_i64_array(buf, "mgn_d_int", na, d) != 0 ||
+        json_get_i64_array(buf, "mgn_c_int", na, c) != 0 ||
+        json_get_i64_array(buf, "mgn_trig_int", na, trig) != 0) return -1;
+    econ_i128 Q = 0;
+    for (int i = 0; i < na; ++i) {
+        if (trig[i] != 0 && trig[i] != 1) return -1;
+        Q += (econ_i128)h[i] * (econ_i128)trig[i];
+    }
+    econ_i128 rawP = (econ_i128)P0 - ((econ_i128)alpha * Q) / (econ_i128)scale;
+    econ_i128 Pcalc = (rawP < (econ_i128)Pmin) ? (econ_i128)Pmin : rawP;
+    if (Pcalc != (econ_i128)Peq) return -1;
+    econ_i128 bd_calc = 0;
+    for (int i = 0; i < na; ++i) {
+        econ_i128 lhs = ((econ_i128)scale - (econ_i128)theta) * Pcalc * (econ_i128)h[i] +
+                        (econ_i128)scale * (econ_i128)c[i];
+        econ_i128 rhs = (econ_i128)scale * (econ_i128)d[i];
+        int64_t expected_t = (lhs < rhs) ? 1 : 0;
+        if (trig[i] != expected_t) return -1;
+        bd_calc += pos_i128((econ_i128)d[i] - (econ_i128)c[i] - Pcalc * (econ_i128)h[i]);
+    }
+    if (bd_calc != (econ_i128)bad_debt) return -1;
+    return 0;
+}
+
+static int verify_inst_block(const char *buf, const char *status) {
+    int64_t sc = 0, mi = 0, md = 0, ms = 0, mast = 0, tgt = 0;
+    int64_t ci = 0, cd = 0, cs = 0, di = 0, dd = 0, ds = 0, rcost = 0;
+    if (json_get_i64(buf, "inst_scale", &sc) != 0 ||
+        json_get_i64(buf, "inst_m_inc", &mi) != 0 ||
+        json_get_i64(buf, "inst_m_dro", &md) != 0 ||
+        json_get_i64(buf, "inst_m_sys", &ms) != 0 ||
+        json_get_i64(buf, "inst_master", &mast) != 0 ||
+        json_get_i64(buf, "inst_target", &tgt) != 0 ||
+        json_get_i64(buf, "inst_c_inc", &ci) != 0 ||
+        json_get_i64(buf, "inst_c_dro", &cd) != 0 ||
+        json_get_i64(buf, "inst_c_sys", &cs) != 0 ||
+        json_get_i64(buf, "inst_d_inc", &di) != 0 ||
+        json_get_i64(buf, "inst_d_dro", &dd) != 0 ||
+        json_get_i64(buf, "inst_d_sys", &ds) != 0 ||
+        json_get_i64(buf, "inst_repair_cost", &rcost) != 0) return -1;
+    if (sc <= 0 || tgt <= 0 || ci < 0 || cd < 0 || cs < 0 || di < 0 || dd < 0 || ds < 0) return -1;
+    int64_t min2 = (md < ms) ? md : ms;
+    int64_t calc_mast = (mi < min2) ? mi : min2;
+    if (calc_mast != mast) return -1;
+    if (strcmp(status, "CERTIFIED") == 0 && mast <= 0) return -1;
+    if (strcmp(status, "VETOED") == 0 && mast > 0) return -1;
+    econ_i128 ei = pos_i128((econ_i128)tgt - (econ_i128)mi);
+    econ_i128 ed = pos_i128((econ_i128)tgt - (econ_i128)md);
+    econ_i128 es = pos_i128((econ_i128)tgt - (econ_i128)ms);
+    if ((econ_i128)di != ei || (econ_i128)dd != ed || (econ_i128)ds != es) return -1;
+    econ_i128 calc_cost = (econ_i128)ci * (econ_i128)di +
+                          (econ_i128)cd * (econ_i128)dd +
+                          (econ_i128)cs * (econ_i128)ds;
+    if (calc_cost != (econ_i128)rcost) return -1;
+    return 0;
+}
+
 int econ_cert_verify_file(const char *cert_path, int verify_input_hash) {
     if (!cert_path) return -1;
     FILE *fp = fopen(cert_path, "rb");
@@ -1148,6 +1395,7 @@ int econ_cert_verify_file(const char *cert_path, int verify_input_hash) {
     }
 
     int64_t has_psd = 0, has_br = 0, has_arb = 0, has_mot = 0, has_dro = 0, has_clr = 0, has_mech = 0;
+    int64_t has_ag = 0, has_adv = 0, has_mgn = 0, has_inst = 0;
     if (json_get_i64(buf, "has_psd", &has_psd) != 0 ||
         json_get_i64(buf, "has_bracket", &has_br) != 0 ||
         json_get_i64(buf, "has_arb", &has_arb) != 0 ||
@@ -1157,6 +1405,10 @@ int econ_cert_verify_file(const char *cert_path, int verify_input_hash) {
         json_get_i64(buf, "has_mech", &has_mech) != 0) {
         rc = -1;
     }
+    (void)json_get_i64(buf, "has_agency", &has_ag);
+    (void)json_get_i64(buf, "has_adverse", &has_adv);
+    (void)json_get_i64(buf, "has_margin", &has_mgn);
+    (void)json_get_i64(buf, "has_inst", &has_inst);
 
     if (rc == 0 && has_psd) {
         int64_t dim = 0, mu_psd = 0, d_round = 0, mu_cert = 0, ok = 0;
@@ -1204,6 +1456,10 @@ int econ_cert_verify_file(const char *cert_path, int verify_input_hash) {
     if (rc == 0 && has_dro && verify_dro_block(buf) != 0) rc = -1;
     if (rc == 0 && has_clr && verify_clearing_block(buf) != 0) rc = -1;
     if (rc == 0 && has_mech && verify_mech_block(buf) != 0) rc = -1;
+    if (rc == 0 && has_ag && verify_agency_block(buf, status) != 0) rc = -1;
+    if (rc == 0 && has_adv && verify_adverse_block(buf, status) != 0) rc = -1;
+    if (rc == 0 && has_mgn && verify_margin_block(buf) != 0) rc = -1;
+    if (rc == 0 && has_inst && verify_inst_block(buf, status) != 0) rc = -1;
 
     free(buf);
     return rc;
@@ -1438,6 +1694,152 @@ int econ_cert_emit_lean(const char *out_path, const char *mod_name,
         emitted_specific = 1;
     }
 
+    if (rec->has_agency) {
+        emit_lean_i64_list(fp, "agPSafe", rec->ag_n_states, rec->ag_p_safe);
+        emit_lean_i64_list(fp, "agPRisk", rec->ag_n_states, rec->ag_p_risk);
+        emit_lean_i64_list(fp, "agR", rec->ag_n_states, rec->ag_R);
+        if (rec->ag_ic_margin > 0) {
+            fprintf(fp, "\ntheorem agency_clawback_check :\n");
+            fprintf(fp, "    checkAgencyClawback %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " agPSafe agPRisk agR = true := by decide\n\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D,
+                    rec->ag_c_safe, rec->ag_c_risk, rec->ag_ic_margin);
+            fprintf(fp, "theorem agency_clawback_ic_sound :\n");
+            fprintf(fp, "    0 < (%" PRId64 " : Int) ∧\n", rec->ag_ic_margin);
+            fprintf(fp, "    agentExpUtil %d (fun s => agPRisk.getD s.val 0) (fun s => agR.getD s.val 0) %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " + %" PRId64 " ≤\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D, rec->ag_c_risk, rec->ag_ic_margin);
+            fprintf(fp, "      agentExpUtil %d (fun s => agPSafe.getD s.val 0) (fun s => agR.getD s.val 0) %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " :=\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D, rec->ag_c_safe);
+            fprintf(fp, "  checkAgencyClawback_sound %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " agPSafe agPRisk agR agency_clawback_check\n\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D,
+                    rec->ag_c_safe, rec->ag_c_risk, rec->ag_ic_margin);
+        } else {
+            fprintf(fp, "\ntheorem agency_limited_liability_hazard_witnessed :\n");
+            fprintf(fp, "    agentExpUtil %d (fun s => agPSafe.getD s.val 0) (fun s => agR.getD s.val 0) %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " ≤\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D, rec->ag_c_safe);
+            fprintf(fp, "    agentExpUtil %d (fun s => agPRisk.getD s.val 0) (fun s => agR.getD s.val 0) %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " := by decide\n\n",
+                    rec->ag_n_states, rec->ag_alpha, rec->ag_beta, rec->ag_K, rec->ag_D, rec->ag_c_risk);
+        }
+        if (rec->ag_has_cantelli_amp) {
+            fprintf(fp, "theorem agency_dro_tail_amplified :\n");
+            fprintf(fp, "    (%" PRId64 " : Int) * (%" PRId64 " * %" PRId64 " * %" PRId64 " + %" PRId64 ") ≤ %" PRId64 " * (%" PRId64 " * %" PRId64 " * %" PRId64 " + %" PRId64 ") :=\n",
+                    rec->ag_S2_safe, rec->ag_W, rec->ag_delta_risk, rec->ag_delta_risk, rec->ag_S2_risk,
+                    rec->ag_S2_risk, rec->ag_W, rec->ag_delta_safe, rec->ag_delta_safe, rec->ag_S2_safe);
+            fprintf(fp, "  agency_dro_tail_amplification (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (by decide) (by decide) (by decide) (by decide) (by decide)\n\n",
+                    rec->ag_W, rec->ag_delta_safe, rec->ag_delta_risk, rec->ag_S2_safe, rec->ag_S2_risk);
+        }
+        emitted_specific = 1;
+    }
+
+    if (rec->has_adverse) {
+        emit_lean_i64_list(fp, "advW", rec->adv_n_types, rec->adv_w);
+        emit_lean_i64_list(fp, "advV", rec->adv_n_types, rec->adv_v);
+        emit_lean_i64_list(fp, "advC", rec->adv_n_types, rec->adv_c);
+        if (rec->adv_k_eq > 0) {
+            fprintf(fp, "\ntheorem adverse_margin_check :\n");
+            fprintf(fp, "    checkPlatformMargin %d %d %" PRId64 " %" PRId64 " %" PRId64 " advW advV advC = true := by decide\n\n",
+                    rec->adv_n_types, rec->adv_k_eq, rec->adv_scale, rec->adv_r, rec->adv_r_star);
+            fprintf(fp, "theorem platform_take_rate_margin_sound :\n");
+            fprintf(fp, "    0 ≤ (%" PRId64 " : Int) - %" PRId64 " ∧\n", rec->adv_r_star, rec->adv_r);
+            fprintf(fp, "    ∀ i : Fin %d, i.val < %d →\n", rec->adv_n_types, rec->adv_k_eq);
+            fprintf(fp, "      advC.getD i.val 0 * (%" PRId64 " * prefixMass %d (fun k => advW.getD k.val 0) %d) ≤\n",
+                    rec->adv_scale, rec->adv_n_types, rec->adv_k_eq);
+            fprintf(fp, "        (%" PRId64 " - %" PRId64 ") * prefixVal %d (fun k => advW.getD k.val 0) (fun k => advV.getD k.val 0) %d :=\n",
+                    rec->adv_scale, rec->adv_r, rec->adv_n_types, rec->adv_k_eq);
+            fprintf(fp, "  checkPlatformMargin_sound %d %d %" PRId64 " %" PRId64 " %" PRId64 " advW advV advC adverse_margin_check\n\n",
+                    rec->adv_n_types, rec->adv_k_eq, rec->adv_scale, rec->adv_r, rec->adv_r_star);
+        } else {
+            fprintf(fp, "\ntheorem adverse_death_spiral_witness : (iterNat (fun k => if k = 0 then 0 else k - 1) %d %d) = 0 :=\n",
+                    rec->adv_n_types, rec->adv_n_types);
+            fprintf(fp, "  akerlof_death_spiral_monotone_unraveling (fun k => if k = 0 then 0 else k - 1) %d rfl (fun k hk _ => by omega)\n\n",
+                    rec->adv_n_types);
+        }
+        if (rec->adv_has_screen) {
+            fprintf(fp, "theorem adverse_screening_ok :\n");
+            fprintf(fp, "    checkScreeningMenu %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " = true := by decide\n\n",
+                    rec->adv_scr_scale, rec->adv_qH, rec->adv_qL, rec->adv_cH, rec->adv_cL,
+                    rec->adv_PH, rec->adv_PL, rec->adv_BH, rec->adv_BL);
+            fprintf(fp, "theorem adverse_screening_ic_sound :\n");
+            fprintf(fp, "    (%" PRId64 " : Int) ≤ %" PRId64 " ∧ (%" PRId64 " : Int) ≤ %" PRId64 " ∧\n",
+                    rec->adv_BL, rec->adv_BH, rec->adv_PL, rec->adv_PH);
+            fprintf(fp, "    0 ≤ screenUtil %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " ∧ 0 ≤ screenUtil %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " :=\n",
+                    rec->adv_scr_scale, rec->adv_qH, rec->adv_cH, rec->adv_PH, rec->adv_BH,
+                    rec->adv_scr_scale, rec->adv_qL, rec->adv_cL, rec->adv_PL, rec->adv_BL);
+            fprintf(fp, "  checkScreeningMenu_sound %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " adverse_screening_ok\n\n",
+                    rec->adv_scr_scale, rec->adv_qH, rec->adv_qL, rec->adv_cH, rec->adv_cL,
+                    rec->adv_PH, rec->adv_PL, rec->adv_BH, rec->adv_BL);
+        }
+        emitted_specific = 1;
+    }
+
+    if (rec->has_margin) {
+        emit_lean_i64_list(fp, "mgnH", rec->mgn_n_accts, rec->mgn_h);
+        emit_lean_i64_list(fp, "mgnD", rec->mgn_n_accts, rec->mgn_d);
+        emit_lean_i64_list(fp, "mgnC", rec->mgn_n_accts, rec->mgn_c);
+        emit_lean_i64_list(fp, "mgnTrig", rec->mgn_n_accts, rec->mgn_trig);
+        fprintf(fp, "\ntheorem margin_cascade_check :\n");
+        fprintf(fp, "    checkMarginCascade %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " mgnH mgnD mgnC mgnTrig = true := by decide\n\n",
+                rec->mgn_n_accts, rec->mgn_scale, rec->mgn_P0, rec->mgn_Pmin, rec->mgn_alpha, rec->mgn_theta, rec->mgn_bad_debt);
+        fprintf(fp, "theorem margin_cascade_fp_sound :\n");
+        fprintf(fp, "    0 < (%" PRId64 " : Int) ∧\n", rec->mgn_scale);
+        fprintf(fp, "    (∀ i : Fin %d, marginStepInt %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " mgnH mgnD mgnC (fun j => mgnTrig.getD j.val 0) i = mgnTrig.getD i.val 0) ∧\n",
+                rec->mgn_n_accts, rec->mgn_n_accts, rec->mgn_scale, rec->mgn_P0, rec->mgn_Pmin, rec->mgn_alpha, rec->mgn_theta);
+        fprintf(fp, "    %" PRId64 " = marginBadDebt %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " mgnH mgnD mgnC (fun j => mgnTrig.getD j.val 0) :=\n",
+                rec->mgn_bad_debt, rec->mgn_n_accts, rec->mgn_scale, rec->mgn_P0, rec->mgn_Pmin, rec->mgn_alpha);
+        fprintf(fp, "  checkMarginCascade_sound %d %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " mgnH mgnD mgnC mgnTrig margin_cascade_check\n\n",
+                rec->mgn_n_accts, rec->mgn_scale, rec->mgn_P0, rec->mgn_Pmin, rec->mgn_alpha, rec->mgn_theta, rec->mgn_bad_debt);
+        emitted_specific = 1;
+    }
+
+    if (rec->has_inst) {
+        if (rec->inst_master > 0) {
+            fprintf(fp, "theorem inst_safety_check : checkInstitution3D (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") = true := by decide\n\n",
+                    rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys, rec->inst_master);
+            fprintf(fp, "theorem inst_3d_certified :\n");
+            fprintf(fp, "    (%" PRId64 " : Int) = masterSafetyIndex ⟨%" PRId64 ", %" PRId64 ", %" PRId64 "⟩ ∧\n",
+                    rec->inst_master, rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+            fprintf(fp, "    0 < (%" PRId64 " : Int) ∧ 0 < (%" PRId64 " : Int) ∧ 0 < (%" PRId64 " : Int) :=\n",
+                    rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+            fprintf(fp, "  checkInstitution3D_sound (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") inst_safety_check\n\n",
+                    rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys, rec->inst_master);
+        } else {
+            if (rec->inst_m_inc <= 0) {
+                fprintf(fp, "theorem inst_weakest_exploit_veto : ∀ d2 d3 : Int,\n");
+                fprintf(fp, "    masterSafetyIndex ⟨%" PRId64 ", (%" PRId64 ") + d2, (%" PRId64 ") + d3⟩ ≤ 0 :=\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+                fprintf(fp, "  (composite_exploit_dominance ⟨%" PRId64 ", %" PRId64 ", %" PRId64 "⟩).1 (by decide)\n\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+            } else if (rec->inst_m_dro <= 0) {
+                fprintf(fp, "theorem inst_weakest_exploit_veto : ∀ d1 d3 : Int,\n");
+                fprintf(fp, "    masterSafetyIndex ⟨(%" PRId64 ") + d1, %" PRId64 ", (%" PRId64 ") + d3⟩ ≤ 0 :=\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+                fprintf(fp, "  (composite_exploit_dominance ⟨%" PRId64 ", %" PRId64 ", %" PRId64 "⟩).2.1 (by decide)\n\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+            } else {
+                fprintf(fp, "theorem inst_weakest_exploit_veto : ∀ d1 d2 : Int,\n");
+                fprintf(fp, "    masterSafetyIndex ⟨(%" PRId64 ") + d1, (%" PRId64 ") + d2, %" PRId64 "⟩ ≤ 0 :=\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+                fprintf(fp, "  (composite_exploit_dominance ⟨%" PRId64 ", %" PRId64 ", %" PRId64 "⟩).2.2 (by decide)\n\n",
+                        rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys);
+            }
+            fprintf(fp, "theorem inst_repair_check : checkMinimalRepair (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") = true := by decide\n\n",
+                    rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys, rec->inst_target,
+                    rec->inst_c_inc, rec->inst_c_dro, rec->inst_c_sys,
+                    rec->inst_d_inc, rec->inst_d_dro, rec->inst_d_sys, rec->inst_repair_cost);
+            fprintf(fp, "theorem inst_minimal_repair_sound :\n");
+            fprintf(fp, "    0 < masterSafetyIndex ⟨(%" PRId64 ") + (%" PRId64 "), (%" PRId64 ") + (%" PRId64 "), (%" PRId64 ") + (%" PRId64 ")⟩ ∧\n",
+                    rec->inst_m_inc, rec->inst_d_inc, rec->inst_m_dro, rec->inst_d_dro, rec->inst_m_sys, rec->inst_d_sys);
+            fprintf(fp, "    (%" PRId64 " : Int) = (%" PRId64 ") * posPart ((%" PRId64 ") - (%" PRId64 ")) + (%" PRId64 ") * posPart ((%" PRId64 ") - (%" PRId64 ")) + (%" PRId64 ") * posPart ((%" PRId64 ") - (%" PRId64 ")) :=\n",
+                    rec->inst_repair_cost, rec->inst_c_inc, rec->inst_target, rec->inst_m_inc,
+                    rec->inst_c_dro, rec->inst_target, rec->inst_m_dro,
+                    rec->inst_c_sys, rec->inst_target, rec->inst_m_sys);
+            fprintf(fp, "  checkMinimalRepair_sound (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") (%" PRId64 ") inst_repair_check\n\n",
+                    rec->inst_m_inc, rec->inst_m_dro, rec->inst_m_sys, rec->inst_target,
+                    rec->inst_c_inc, rec->inst_c_dro, rec->inst_c_sys,
+                    rec->inst_d_inc, rec->inst_d_dro, rec->inst_d_sys, rec->inst_repair_cost);
+        }
+        emitted_specific = 1;
+    }
+
     if (!emitted_specific && rec->has_bracket) {
         fprintf(fp, "theorem bracket_enclosure_valid : (%" PRId64 " : Int) ≤ %" PRId64 " := by decide\n\n",
                 rec->lb_int, rec->ub_int);
@@ -1462,6 +1864,21 @@ int econ_cert_emit_lean(const char *out_path, const char *mod_name,
         if (rec->mech_mode == 1) fprintf(fp, "#print axioms vcg_certified_dsic_ir\n");
         else if (rec->mech_mode == 2) fprintf(fp, "#print axioms ms_deficit_certified\n");
         else fprintf(fp, "#print axioms fisher_clear_sound\n");
+    }
+    if (rec->has_agency) {
+        if (rec->ag_ic_margin > 0) fprintf(fp, "#print axioms agency_clawback_ic_sound\n");
+        else fprintf(fp, "#print axioms agency_limited_liability_hazard_witnessed\n");
+        if (rec->ag_has_cantelli_amp) fprintf(fp, "#print axioms agency_dro_tail_amplified\n");
+    }
+    if (rec->has_adverse) {
+        if (rec->adv_k_eq > 0) fprintf(fp, "#print axioms platform_take_rate_margin_sound\n");
+        else fprintf(fp, "#print axioms adverse_death_spiral_witness\n");
+        if (rec->adv_has_screen) fprintf(fp, "#print axioms adverse_screening_ic_sound\n");
+    }
+    if (rec->has_margin) fprintf(fp, "#print axioms margin_cascade_fp_sound\n");
+    if (rec->has_inst) {
+        if (rec->inst_master > 0) fprintf(fp, "#print axioms inst_3d_certified\n");
+        else fprintf(fp, "#print axioms inst_minimal_repair_sound\n");
     }
     if (!emitted_specific) fprintf(fp, "#print axioms sdd_quadratic_form_nonneg\n");
 

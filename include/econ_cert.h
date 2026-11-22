@@ -9,12 +9,15 @@
 extern "C" {
 #endif
 
-#define ECON_VERSION_STRING "1.0.0"
-#define ECON_CERT_MAX_DIM   32
-#define ECON_CERT_MAX_GRID  16
-#define ECON_CERT_MAX_BANKS 32
-#define ECON_CERT_MAX_OUT   16
-#define ECON_CERT_PATH_MAX  512
+#define ECON_VERSION_STRING "2.0.0"
+#define ECON_CERT_MAX_DIM    32
+#define ECON_CERT_MAX_GRID   16
+#define ECON_CERT_MAX_BANKS  32
+#define ECON_CERT_MAX_OUT    16
+#define ECON_CERT_MAX_STATES 16
+#define ECON_CERT_MAX_TYPES  32
+#define ECON_CERT_MAX_ACCTS  32
+#define ECON_CERT_PATH_MAX   512
 
 typedef enum {
     ECON_LP_LE = 0,
@@ -148,6 +151,79 @@ typedef struct {
     int64_t mech_fisher_w[ECON_CERT_MAX_GRID];
     int64_t mech_fisher_x[ECON_CERT_MAX_GRID * ECON_CERT_MAX_GRID];
     int64_t mech_fisher_tol;
+
+    /* Pillar 5: Principal-Agent Convexity & Clawback IC/DRO (M19–M21) */
+    int has_agency;
+    int ag_n_states;
+    int64_t ag_alpha;
+    int64_t ag_beta;
+    int64_t ag_K;
+    int64_t ag_D;
+    int64_t ag_c_safe;
+    int64_t ag_c_risk;
+    int64_t ag_ic_margin;
+    int64_t ag_p_safe[ECON_CERT_MAX_STATES];
+    int64_t ag_p_risk[ECON_CERT_MAX_STATES];
+    int64_t ag_R[ECON_CERT_MAX_STATES];
+    int ag_has_cantelli_amp;
+    int64_t ag_W;
+    int64_t ag_delta_safe;
+    int64_t ag_delta_risk;
+    int64_t ag_S2_safe;
+    int64_t ag_S2_risk;
+
+    /* Pillar 6: Adverse Selection, Take-Rate Cliff & Screening Menu (M22–M24) */
+    int has_adverse;
+    int adv_n_types;
+    int adv_k_eq;
+    int64_t adv_scale;
+    int64_t adv_r;
+    int64_t adv_r_star;
+    int64_t adv_w[ECON_CERT_MAX_TYPES];
+    int64_t adv_v[ECON_CERT_MAX_TYPES];
+    int64_t adv_c[ECON_CERT_MAX_TYPES];
+    int adv_has_screen;
+    int64_t adv_scr_scale;
+    int64_t adv_qH;
+    int64_t adv_qL;
+    int64_t adv_cH;
+    int64_t adv_cL;
+    int64_t adv_PH;
+    int64_t adv_PL;
+    int64_t adv_BH;
+    int64_t adv_BL;
+
+    /* Pillar 7: Endogenous Margin-Liquidation Cascade & Paradox (M25–M27) */
+    int has_margin;
+    int mgn_n_accts;
+    int64_t mgn_scale;
+    int64_t mgn_P0;
+    int64_t mgn_Pmin;
+    int64_t mgn_alpha;
+    int64_t mgn_theta;
+    int64_t mgn_P_eq;
+    int64_t mgn_bad_debt;
+    int64_t mgn_h[ECON_CERT_MAX_ACCTS];
+    int64_t mgn_d[ECON_CERT_MAX_ACCTS];
+    int64_t mgn_c[ECON_CERT_MAX_ACCTS];
+    int64_t mgn_trig[ECON_CERT_MAX_ACCTS];
+
+    /* Pillar 8: Unified 3D Institutional Safety-Margin & Repair (M28–M30) */
+    int has_inst;
+    int64_t inst_scale;
+    int64_t inst_m_inc;
+    int64_t inst_m_dro;
+    int64_t inst_m_sys;
+    int64_t inst_master;
+    int64_t inst_target;
+    int64_t inst_c_inc;
+    int64_t inst_c_dro;
+    int64_t inst_c_sys;
+    int64_t inst_d_inc;
+    int64_t inst_d_dro;
+    int64_t inst_d_sys;
+    int64_t inst_repair_cost;
+    char inst_weakest[16];
 } econ_cert_record_t;
 
 /* FIPS-180-4 SHA-256 */

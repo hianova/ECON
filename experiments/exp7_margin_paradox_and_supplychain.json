@@ -1,0 +1,642 @@
+{
+  "margin_sweep": [
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.02,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.08647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.04,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.11647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.06,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.14647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.08,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.17647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.1,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.17647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.12,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.17647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.15,
+      "P_eq": 100.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.17647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.18,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.2,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.25,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.3,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.35,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.4,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.0,
+      "theta_mm": 0.45,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.02,
+      "P_eq": 95.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.027647058823529413,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.04,
+      "P_eq": 95.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.05764705882352941,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.06,
+      "P_eq": 95.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.08764705882352941,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.08,
+      "P_eq": 95.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.11764705882352941,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.1,
+      "P_eq": 95.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": 0.11764705882352941,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.12,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.15,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.18,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.2,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.25,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.3,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.35,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.4,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.05,
+      "theta_mm": 0.45,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.08
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.02,
+      "P_eq": 90.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": -0.03117647058823529,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.04,
+      "P_eq": 90.0,
+      "bad_debt": 0.0,
+      "liquidated_count": 0,
+      "liquidated_units": 0.0,
+      "macro_safety_margin": -0.0011764705882352927,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.06,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -2.003937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.08,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.1,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.12,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.15,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.18,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.2,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.25,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.3,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.35,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.4,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    },
+    {
+      "shock_pct": 0.1,
+      "theta_mm": 0.45,
+      "P_eq": 10.0,
+      "bad_debt": 34000.0,
+      "liquidated_count": 8,
+      "liquidated_units": 640.0,
+      "macro_safety_margin": -1.973937099592312,
+      "theta_opt": 0.055
+    }
+  ],
+  "supply_sweep": [
+    {
+      "tau": 0.5,
+      "core_wc_apparent_gain": -18.0,
+      "shock_horizon_margin": 3.0,
+      "uniform_shortfall": 0.0,
+      "searu_shortfall": 0.0,
+      "min_bailout_total": 0.0,
+      "systemic_safety_margin": 0.046511627906976744
+    },
+    {
+      "tau": 0.75,
+      "core_wc_apparent_gain": -9.0,
+      "shock_horizon_margin": 3.0,
+      "uniform_shortfall": 0.0,
+      "searu_shortfall": 0.0,
+      "min_bailout_total": 0.0,
+      "systemic_safety_margin": 0.031007751937984496
+    },
+    {
+      "tau": 1.0,
+      "core_wc_apparent_gain": 0.0,
+      "shock_horizon_margin": 3.0,
+      "uniform_shortfall": 0.0,
+      "searu_shortfall": 28.216407190993223,
+      "min_bailout_total": 0.0,
+      "systemic_safety_margin": -0.41420786342625154
+    },
+    {
+      "tau": 1.25,
+      "core_wc_apparent_gain": 9.0,
+      "shock_horizon_margin": 1.0,
+      "uniform_shortfall": 0.0,
+      "searu_shortfall": 62.168877260559526,
+      "min_bailout_total": 0.0,
+      "systemic_safety_margin": -0.7648852993557771
+    },
+    {
+      "tau": 1.5,
+      "core_wc_apparent_gain": 18.0,
+      "shock_horizon_margin": -2.0,
+      "uniform_shortfall": 3.9697595135402253,
+      "searu_shortfall": 128.0044555880579,
+      "min_bailout_total": 2.0,
+      "systemic_safety_margin": -1.3333793859230791
+    },
+    {
+      "tau": 1.75,
+      "core_wc_apparent_gain": 27.0,
+      "shock_horizon_margin": -5.0,
+      "uniform_shortfall": 17.604739211710893,
+      "searu_shortfall": 167.8250595039384,
+      "min_bailout_total": 5.0,
+      "systemic_safety_margin": -1.508970626834449
+    },
+    {
+      "tau": 2.0,
+      "core_wc_apparent_gain": 36.0,
+      "shock_horizon_margin": -8.0,
+      "uniform_shortfall": 32.43399809901939,
+      "searu_shortfall": 204.06023175044638,
+      "min_bailout_total": 8.0,
+      "systemic_safety_margin": -1.612870013569352
+    },
+    {
+      "tau": 2.5,
+      "core_wc_apparent_gain": 54.0,
+      "shock_horizon_margin": -14.0,
+      "uniform_shortfall": 211.64710906764134,
+      "searu_shortfall": 272.8373083030974,
+      "min_bailout_total": 14.0,
+      "systemic_safety_margin": -1.7354251677711467
+    },
+    {
+      "tau": 3.0,
+      "core_wc_apparent_gain": 72.0,
+      "shock_horizon_margin": -20.0,
+      "uniform_shortfall": 290.94585216593316,
+      "searu_shortfall": 339.63694757707884,
+      "min_bailout_total": 20.0,
+      "systemic_safety_margin": -1.806909289804025
+    },
+    {
+      "tau": 3.5,
+      "core_wc_apparent_gain": 90.0,
+      "shock_horizon_margin": -26.0,
+      "uniform_shortfall": 362.54372319817236,
+      "searu_shortfall": 405.5842206394671,
+      "min_bailout_total": 26.0,
+      "systemic_safety_margin": -1.854193668391881
+    }
+  ],
+  "cert_cases": [
+    {
+      "kind": "margin",
+      "n_accts": 8,
+      "theta_mm": 0.04,
+      "alpha_impact": 0.15,
+      "P_start": 100.0,
+      "P_eq": 100.0,
+      "total_debt": 40400.0,
+      "liquidated_units": 0.0,
+      "liquidated_count": 0,
+      "bad_debt": 0.0,
+      "macro_safety_margin": 0.11647059,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.17647059,
+      "paradox_detected": 0
+    },
+    {
+      "kind": "margin",
+      "n_accts": 8,
+      "theta_mm": 0.12,
+      "alpha_impact": 0.15,
+      "P_start": 100.0,
+      "P_eq": 100.0,
+      "total_debt": 40400.0,
+      "liquidated_units": 0.0,
+      "liquidated_count": 0,
+      "bad_debt": 0.0,
+      "macro_safety_margin": 0.17647059,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.17647059,
+      "paradox_detected": 0
+    },
+    {
+      "kind": "margin",
+      "n_accts": 8,
+      "theta_mm": 0.2,
+      "alpha_impact": 0.15,
+      "P_start": 100.0,
+      "P_eq": 10.0,
+      "total_debt": 40400.0,
+      "liquidated_units": 640.0,
+      "liquidated_count": 8,
+      "bad_debt": 34000.0,
+      "macro_safety_margin": -1.9739371,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.17647059,
+      "paradox_detected": 1
+    },
+    {
+      "kind": "margin",
+      "n_accts": 8,
+      "theta_mm": 0.3,
+      "alpha_impact": 0.15,
+      "P_start": 100.0,
+      "P_eq": 10.0,
+      "total_debt": 40400.0,
+      "liquidated_units": 640.0,
+      "liquidated_count": 8,
+      "bad_debt": 34000.0,
+      "macro_safety_margin": -1.9739371,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.17647059,
+      "paradox_detected": 1
+    },
+    {
+      "kind": "margin",
+      "n_accts": 8,
+      "theta_mm": 0.4,
+      "alpha_impact": 0.15,
+      "P_start": 100.0,
+      "P_eq": 10.0,
+      "total_debt": 40400.0,
+      "liquidated_units": 640.0,
+      "liquidated_count": 8,
+      "bad_debt": 34000.0,
+      "macro_safety_margin": -1.9739371,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.17647059,
+      "paradox_detected": 1
+    },
+    {
+      "kind": "supply",
+      "n_firms": 10,
+      "tau_horizon": 0.8,
+      "total_payables": 103.2,
+      "core_wc_apparent_gain": -7.2,
+      "shock_horizon_margin": 3.0,
+      "uniform_shortfall": 0.0,
+      "searu_shortfall": 0.0,
+      "searu_amp": 1.0,
+      "min_bailout_total": 0.0,
+      "defaults_searu": 0,
+      "systemic_safety_margin": 0.02906977
+    },
+    {
+      "kind": "supply",
+      "n_firms": 10,
+      "tau_horizon": 1.5,
+      "total_payables": 193.5,
+      "core_wc_apparent_gain": 18.0,
+      "shock_horizon_margin": -2.0,
+      "uniform_shortfall": 3.96975951,
+      "searu_shortfall": 128.00445559,
+      "searu_amp": 1.0,
+      "min_bailout_total": 2.0,
+      "defaults_searu": 4,
+      "systemic_safety_margin": -1.33337939
+    },
+    {
+      "kind": "supply",
+      "n_firms": 10,
+      "tau_horizon": 2.5,
+      "total_payables": 322.5,
+      "core_wc_apparent_gain": 54.0,
+      "shock_horizon_margin": -14.0,
+      "uniform_shortfall": 211.64710907,
+      "searu_shortfall": 272.8373083,
+      "searu_amp": 1.0,
+      "min_bailout_total": 14.0,
+      "defaults_searu": 10,
+      "systemic_safety_margin": -1.73542517
+    }
+  ],
+  "certs_verified": 8,
+  "certs_total": 8
+}

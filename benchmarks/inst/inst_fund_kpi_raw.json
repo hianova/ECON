@@ -1,0 +1,15 @@
+{
+  "institution_name": "AlphaCap_2and20_Raw",
+  "institution_type": "fund_agency",
+  "target_margin_bps": 500.0,
+  "c_inc": 1.0,
+  "c_dro": 1.5,
+  "c_sys": 1.2,
+  "inc_ref_path": "benchmarks/agency/fund_2and20_raw.json",
+  "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+  "sys_ref_path": "benchmarks/clearing/ring_network_6.json",
+  "beta_override": 0.0,
+  "dro_reserve_mult": 1.0,
+  "bailout_buffer": 0.0,
+  "chain_fee_bps": 4000.0
+}

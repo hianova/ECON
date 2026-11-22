@@ -1,0 +1,15 @@
+{
+  "institution_name": "BazaarX_HighTake_Raw",
+  "institution_type": "platform_adverse",
+  "target_margin_bps": 500.0,
+  "c_inc": 1.2,
+  "c_dro": 1.0,
+  "c_sys": 1.0,
+  "inc_ref_path": "benchmarks/adverse/insurance_death_spiral.json",
+  "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+  "sys_ref_path": "",
+  "take_override": 0.42,
+  "dro_reserve_mult": 1.0,
+  "bailout_buffer": 0.0,
+  "chain_fee_bps": 500.0
+}

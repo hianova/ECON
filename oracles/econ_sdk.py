@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pure Python stdlib SDK & in-process ctypes session wrapper for ECON v1.0.0."""
+"""Pure Python stdlib SDK & in-process ctypes session wrapper for ECON v2.0.0."""
 
 from __future__ import annotations
 
@@ -91,6 +91,50 @@ class EconEngine:
             args += ["--cert", cert_path]
         return self._run_json(args)
 
+    def agency_audit(self, json_path: str, beta: float | None = None, cert_path: str | None = None) -> dict:
+        args = ["agency-audit", json_path]
+        if beta is not None:
+            args += ["--beta", str(beta)]
+        if cert_path:
+            args += ["--cert", cert_path]
+        return self._run_json(args)
+
+    def adverse_audit(self, json_path: str, take_rate: float | None = None, cert_path: str | None = None) -> dict:
+        args = ["adverse-audit", json_path]
+        if take_rate is not None:
+            args += ["--take-rate", str(take_rate)]
+        if cert_path:
+            args += ["--cert", cert_path]
+        return self._run_json(args)
+
+    def margin_audit(self, json_path: str, theta: float | None = None, alpha: float | None = None, cert_path: str | None = None) -> dict:
+        args = ["margin-audit", json_path]
+        if theta is not None:
+            args += ["--theta", str(theta)]
+        if alpha is not None:
+            args += ["--alpha", str(alpha)]
+        if cert_path:
+            args += ["--cert", cert_path]
+        return self._run_json(args)
+
+    def supply_audit(self, json_path: str, tau: float | None = None, searu: bool = True, cert_path: str | None = None) -> dict:
+        args = ["supply-audit", json_path]
+        if tau is not None:
+            args += ["--tau", str(tau)]
+        if searu:
+            args += ["--searu"]
+        if cert_path:
+            args += ["--cert", cert_path]
+        return self._run_json(args)
+
+    def audit_inst(self, json_path: str, cert_path: str | None = None, lean_path: str | None = None, mod_name: str = "CertInst") -> dict:
+        args = ["audit-inst", json_path]
+        if cert_path:
+            args += ["--cert", cert_path]
+        if lean_path:
+            args += ["--emit-lean", lean_path, "--name", mod_name]
+        return self._run_json(args)
+
     def cert_verify(self, cert_path: str, check_hash: bool = True) -> bool:
         args = [self.cli_path, "cert-verify", cert_path]
         if not check_hash:
@@ -125,6 +169,22 @@ class EconFastSession:
                 ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double)
             ]
             lib.econ_fast_ms_eval.restype = ctypes.c_int
+            lib.econ_fast_agency_eval.argtypes = [
+                ctypes.c_char_p, ctypes.c_double, ctypes.c_double, ctypes.POINTER(ctypes.c_double)
+            ]
+            lib.econ_fast_agency_eval.restype = ctypes.c_int
+            lib.econ_fast_adverse_eval.argtypes = [
+                ctypes.c_char_p, ctypes.c_double, ctypes.POINTER(ctypes.c_double)
+            ]
+            lib.econ_fast_adverse_eval.restype = ctypes.c_int
+            lib.econ_fast_margin_eval.argtypes = [
+                ctypes.c_char_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.POINTER(ctypes.c_double)
+            ]
+            lib.econ_fast_margin_eval.restype = ctypes.c_int
+            lib.econ_fast_supply_eval.argtypes = [
+                ctypes.c_char_p, ctypes.c_double, ctypes.POINTER(ctypes.c_double)
+            ]
+            lib.econ_fast_supply_eval.restype = ctypes.c_int
             cls._LIB_CACHE[key] = lib
         return cls._LIB_CACHE[key]
 
@@ -174,4 +234,62 @@ class EconFastSession:
             "max_budget_surplus": buf[2],
             "norm_surplus_ratio": buf[3],
             "second_best_eff_pct": buf[4],
+        }
+
+    def eval_agency(self, json_path: str, alpha: float, beta: float) -> dict:
+        buf = (ctypes.c_double * 6)()
+        rc = self._lib.econ_fast_agency_eval(json_path.encode("utf-8"), float(alpha), float(beta), buf)
+        if rc != 0:
+            raise RuntimeError(f"econ_fast_agency_eval failed for {json_path}")
+        return {
+            "ic_margin": buf[0],
+            "beta_star": buf[1],
+            "sys_ev_gap": buf[2],
+            "cantelli_safe": buf[3],
+            "cantelli_risk": buf[4],
+            "amp_ratio": buf[5],
+        }
+
+    def eval_adverse(self, json_path: str, take_rate: float) -> dict:
+        buf = (ctypes.c_double * 6)()
+        rc = self._lib.econ_fast_adverse_eval(json_path.encode("utf-8"), float(take_rate), buf)
+        if rc != 0:
+            raise RuntimeError(f"econ_fast_adverse_eval failed for {json_path}")
+        return {
+            "k_eq": int(round(buf[0])),
+            "surviving_mass_frac": buf[1],
+            "eq_pool_price": buf[2],
+            "platform_revenue": buf[3],
+            "critical_r_star": buf[4],
+            "safety_margin_r": buf[5],
+        }
+
+    def eval_margin(self, json_path: str, theta_mm: float, alpha_impact: float, shock_pct: float = 0.0) -> dict:
+        buf = (ctypes.c_double * 6)()
+        rc = self._lib.econ_fast_margin_eval(
+            json_path.encode("utf-8"), float(theta_mm), float(alpha_impact), float(shock_pct), buf
+        )
+        if rc != 0:
+            raise RuntimeError(f"econ_fast_margin_eval failed for {json_path}")
+        return {
+            "P_eq": buf[0],
+            "bad_debt": buf[1],
+            "liquidated_count": int(round(buf[2])),
+            "liquidated_units": buf[3],
+            "macro_safety_margin": buf[4],
+            "theta_opt": buf[5],
+        }
+
+    def eval_supply(self, json_path: str, tau: float) -> dict:
+        buf = (ctypes.c_double * 6)()
+        rc = self._lib.econ_fast_supply_eval(json_path.encode("utf-8"), float(tau), buf)
+        if rc != 0:
+            raise RuntimeError(f"econ_fast_supply_eval failed for {json_path}")
+        return {
+            "core_wc_apparent_gain": buf[0],
+            "shock_horizon_margin": buf[1],
+            "uniform_shortfall": buf[2],
+            "searu_shortfall": buf[3],
+            "min_bailout_total": buf[4],
+            "systemic_safety_margin": buf[5],
         }

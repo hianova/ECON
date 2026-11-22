@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-End CLI, EconFastSession ctypes SDK & 12/12 Tamper-Rejection Test Suite."""
+"""End-to-End CLI, EconFastSession ctypes SDK & 22/22 Tamper-Rejection Test Suite."""
 
 from __future__ import annotations
 
@@ -46,6 +46,29 @@ def main() -> None:
     f1 = eng.fisher_eq("benchmarks/mech/fisher_4agent_3good.json")
     assert f1["certified"] == 1
 
+    # v2.0.0 Pillars 5-8 CLI & SDK checks
+    ag0 = eng.agency_audit("benchmarks/agency/fund_2and20_raw.json")
+    assert ag0["ic_satisfied"] == 0 and ag0["cantelli_amp_ratio"] > 5.0
+    ag1 = eng.agency_audit("benchmarks/agency/fund_2and20_clawback.json")
+    assert ag1["ic_satisfied"] == 1 and ag1["ic_margin"] > 0.0
+
+    av0 = eng.adverse_audit("benchmarks/adverse/platform_marketplace.json")
+    assert av0["k_eq"] >= 4 and av0["screening_valid"] == 1 and av0["screened_r_star"] > av0["critical_r_star"]
+    av1 = eng.adverse_audit("benchmarks/adverse/insurance_death_spiral.json")
+    assert av1["k_eq"] == 0 and av1["full_collapse"] == 1
+
+    mg0 = eng.margin_audit("benchmarks/margin/exchange_perp_8acct.json", theta=0.12)
+    mg1 = eng.margin_audit("benchmarks/margin/exchange_perp_8acct.json", theta=0.30)
+    assert mg0["bad_debt"] == 0.0 and mg1["bad_debt"] > 10000.0 and mg1["paradox_detected"] == 1
+
+    sup0 = eng.supply_audit("benchmarks/margin/supply_chain_tier3_10firm.json", tau=0.8)
+    sup1 = eng.supply_audit("benchmarks/margin/supply_chain_tier3_10firm.json", tau=2.5)
+    assert sup1["shock_horizon_margin"] < sup0["shock_horizon_margin"] and sup1["searu_shortfall"] > sup0["searu_shortfall"]
+
+    in0 = eng.audit_inst("benchmarks/inst/inst_fund_kpi_raw.json")
+    in1 = eng.audit_inst("benchmarks/inst/inst_fund_kpi_repaired.json")
+    assert in0["certified"] == 0 and in1["certified"] == 1
+
     # EconFastSession ctypes persistent FFI test
     sess = EconFastSession("benchmarks/clearing/ring_network_6.json")
     s_lo = sess.sweep_clearing(alpha_fire=0.2, beta_def=0.95, shock_scale=1.0)
@@ -53,9 +76,17 @@ def main() -> None:
     assert s_hi["systemic_shortfall"] >= s_lo["systemic_shortfall"]
     ms_fast = sess.eval_ms(6, second_best=True)
     assert abs(ms_fast["max_budget_surplus"] + 14.0) < 1e-4
+    f_ag = sess.eval_agency("benchmarks/agency/fund_2and20_raw.json", alpha=0.20, beta=0.35)
+    assert f_ag["ic_margin"] > 0.0
+    f_av = sess.eval_adverse("benchmarks/adverse/platform_marketplace.json", take_rate=0.15)
+    assert f_av["k_eq"] >= 4
+    f_mg = sess.eval_margin("benchmarks/margin/exchange_perp_8acct.json", theta_mm=0.12, alpha_impact=0.15, shock_pct=0.0)
+    assert f_mg["bad_debt"] == 0.0
+    f_sp = sess.eval_supply("benchmarks/margin/supply_chain_tier3_10firm.json", tau=1.0)
+    assert f_sp["searu_shortfall"] >= 0.0 and f_sp["shock_horizon_margin"] <= 1e6
     sess.close()
 
-    # 12/12 Zero-FP-Trust Tamper-Rejection Suite
+    # 22/22 Zero-FP-Trust Tamper-Rejection Suite
     cert_dir = "build/certs"
     with tempfile.TemporaryDirectory() as tmp:
         def load(name: str) -> dict:
@@ -139,7 +170,40 @@ def main() -> None:
         r14["mech_fisher_p_int"][0] = 0
         save_and_fail(r14, "t14_fisher.json", "T14_FISHER_POS_PRICE")
 
-    print("  [TEST_TOOLS PASS] CLI + EconEngine + EconFastSession + 14/14 Tamper-Rejection checks PASS")
+        # 15-22. Pillars 5-8 Zero-FP-Trust Tamper-Rejection checks
+        r15 = load("ag_clawback.econcert.json")
+        r15["ag_ic_margin"] += 500
+        save_and_fail(r15, "t15_ag_ic.json", "T15_AGENCY_IC")
+
+        r16 = load("ag_clawback.econcert.json")
+        r16["ag_S2_risk"] = 1
+        save_and_fail(r16, "t16_ag_cant.json", "T16_AGENCY_CANTELLI")
+
+        r17 = load("adv_platform.econcert.json")
+        r17["adv_r_star"] = r17["adv_scale"]
+        save_and_fail(r17, "t17_adv_rstar.json", "T17_ADVERSE_RSTAR")
+
+        r18 = load("adv_platform.econcert.json")
+        r18["adv_BH"] = -1000
+        save_and_fail(r18, "t18_adv_scr.json", "T18_SCREEN_IC")
+
+        r19 = load("mgn_perp8.econcert.json")
+        r19["mgn_trig_int"][0] = 0
+        save_and_fail(r19, "t19_mgn_trig.json", "T19_MARGIN_TRIG")
+
+        r20 = load("mgn_perp8.econcert.json")
+        r20["mgn_bad_debt"] = 0
+        save_and_fail(r20, "t20_mgn_bd.json", "T20_MARGIN_BADDEBT")
+
+        r21 = load("inst_fund_raw.econcert.json")
+        r21["inst_master"] = 999
+        save_and_fail(r21, "t21_inst_mast.json", "T21_INST_MASTER")
+
+        r22 = load("inst_fund_raw.econcert.json")
+        r22["inst_repair_cost"] += 42
+        save_and_fail(r22, "t22_inst_cost.json", "T22_INST_REPAIR_COST")
+
+    print("  [TEST_TOOLS PASS] CLI + EconEngine + EconFastSession + 22/22 Tamper-Rejection checks PASS")
 
 
 if __name__ == "__main__":

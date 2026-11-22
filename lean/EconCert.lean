@@ -1,9 +1,9 @@
 /-
-  EconCert — Formal Zero-FP-Trust Verification Kernel for ECON v1.0.0
+  EconCert — Formal Zero-FP-Trust Verification Kernel for ECON v2.0.0
   ====================================================================
   Imports ONLY `Flow.Interval` (domain-free, zero IO, zero `sorryAx`,
-  zero `axiom`, zero `Lean.ofReduceBool`) and proves 18 theorems (`M1–M18`)
-  across four economic & financial pillars:
+  zero `axiom`, zero `Lean.ofReduceBool`) and proves 30 theorems (`M1–M30`)
+  across eight institutional & economic pillars:
     - Core Linear Algebra & LP Duality:
       M1  `sdd_quadratic_form_nonneg`
       M2  `cholesky_sdd_certified_psd`
@@ -27,6 +27,22 @@
       M16 `eisenberg_noe_tarski_bracket` (+ `checkTarskiBracket_sound`)
       M17 `fire_sale_contagion_monotone_dominance`
       M18 `bailout_injection_sufficiency_cert` (+ `checkBailoutSufficiency_sound`)
+    - Pillar 5 — Principal-Agent Convexity & Clawback Design:
+      M19 `limited_liability_left_tail_blindness` (+ `limited_liability_convexity_hazard`)
+      M20 `clawback_escrow_ic_margin` (+ `checkAgencyClawback_sound`)
+      M21 `agency_dro_tail_amplification`
+    - Pillar 6 — Adverse Selection, Akerlof Death Spiral & Screening:
+      M22 `akerlof_death_spiral_monotone_unraveling` (+ `prefix_avg_monotone`)
+      M23 `platform_take_rate_safety_margin` (+ `checkPlatformMargin_sound`)
+      M24 `screening_deductible_separation_ic` (+ `checkScreeningMenu_sound`)
+    - Pillar 7 — Endogenous Margin-Liquidation Paradox & Supply-Chain Horizon:
+      M25 `liquidation_cascade_tarski_cliff` (+ `checkMarginCascade_sound`)
+      M26 `micro_macro_safety_paradox_witness`
+      M27 `supply_chain_credit_horizon_bound` (+ `checkSupplyChainMargin_sound`)
+    - Pillar 8 — Unified 3D Institutional Safety-Margin & Commercial DRC/LVS:
+      M28 `institution_3d_safety_margin_sound` (+ `checkInstitution3D_sound`)
+      M29 `composite_exploit_dominance`
+      M30 `minimal_institutional_repair_sound` (+ `checkMinimalRepair_sound`)
 -/
 import Flow.Interval
 
@@ -1270,5 +1286,578 @@ theorem checkBailoutSufficiency_sound (n : Nat) (scale : Int) (pBar extAssets z 
       have hk := of_decide_eq_true (allFinB_true n _ hChk.2 k)
       simp only [decide_eq_true_eq] at hk
       exact hk.2) i
+
+/-! ## 6. Pillar 5 — Principal-Agent Convexity, Limited Liability & Clawback (M19–M21) -/
+
+def agentPayoff (α β K D r : Int) : Int :=
+  α * posPart (r - K) - β * posPart (D - r)
+
+def agentExpUtil (S : Nat) (p R : Fin S → Int) (α β K D c : Int) : Int :=
+  sumFin S (fun s => p s * agentPayoff α β K D (R s)) - c
+
+def sysExpReturn (S : Nat) (p R : Fin S → Int) : Int :=
+  sumFin S (fun s => p s * R s)
+
+/-- Theorem M19a (Limited Liability Left-Tail Blindness):
+    When downside clawback `β = 0`, all left-tail returns `r1, r2 ≤ K` produce
+    the exact same zero payoff to the agent regardless of how severe `r` is. -/
+theorem limited_liability_left_tail_blindness (α K D r1 r2 : Int)
+    (h1 : r1 ≤ K) (h2 : r2 ≤ K) :
+    agentPayoff α 0 K D r1 = agentPayoff α 0 K D r2 := by
+  unfold agentPayoff posPart
+  have hnk1 : ¬ (K < r1) := by omega
+  have hnk2 : ¬ (K < r2) := by omega
+  simp [hnk1, hnk2]
+
+/-- Theorem M19b (Limited Liability Convexity Hazard & Constructive Witness):
+    (1) Under `β = 0`, whenever `sysExpReturn` favors `pSafe` yet call-option agent utility
+        favors `pRisk`, the agent strictly chooses the value-destroying strategy.
+    (2) Constructive 3-state witness with positive equity call (`α = 2, K = 5`). -/
+theorem limited_liability_convexity_hazard (S : Nat) (pSafe pRisk R : Fin S → Int)
+    (α K D cSafe cRisk : Int)
+    (hSys : sysExpReturn S pRisk R < sysExpReturn S pSafe R)
+    (hAg : agentExpUtil S pSafe R α 0 K D cSafe < agentExpUtil S pRisk R α 0 K D cRisk) :
+    sysExpReturn S pRisk R < sysExpReturn S pSafe R ∧
+    agentExpUtil S pSafe R α 0 K D cSafe < agentExpUtil S pRisk R α 0 K D cRisk :=
+  ⟨hSys, hAg⟩
+
+theorem limited_liability_hazard_witness :
+    let R : Fin 3 → Int := fun i => if i.val = 0 then 2 else if i.val = 1 then 10 else -40
+    let pSafe : Fin 3 → Int := fun i => if i.val = 0 then 10 else 0
+    let pRisk : Fin 3 → Int := fun i => if i.val = 0 then 0 else if i.val = 1 then 8 else 2
+    sysExpReturn 3 pRisk R < sysExpReturn 3 pSafe R ∧
+    agentExpUtil 3 pSafe R 2 0 5 0 0 < agentExpUtil 3 pRisk R 2 0 5 0 0 := by
+  decide
+
+private theorem agent_exp_decomp (S : Nat) (p R : Fin S → Int) (α β K D c : Int) :
+    agentExpUtil S p R α β K D c =
+      α * sumFin S (fun s => p s * posPart (R s - K)) -
+      β * sumFin S (fun s => p s * posPart (D - R s)) - c := by
+  unfold agentExpUtil agentPayoff
+  have h1 : ∀ s, p s * (α * posPart (R s - K) - β * posPart (D - R s)) =
+      α * (p s * posPart (R s - K)) - β * (p s * posPart (D - R s)) := by
+    intro s
+    rw [Int.mul_sub, Int.mul_left_comm (p s) α _, Int.mul_left_comm (p s) β _]
+  rw [sumFin_congr h1, sumFin_sub, ← sumFin_mul_left, ← sumFin_mul_left]
+
+/-- Theorem M20 (Clawback Escrow IC Margin & Monotonicity):
+    Decomposes the Safe-vs-Risk incentive gap linearly in clawback rate `β`, proving strict IC
+    whenever `upsideGap + β * tailGap > 0` and monotonicity in `β` whenever `tailGap ≥ 0`. -/
+theorem clawback_escrow_ic_margin (S : Nat) (pSafe pRisk R : Fin S → Int)
+    (α β K D cSafe cRisk : Int) :
+    let upsideGap := α * (sumFin S (fun s => pSafe s * posPart (R s - K)) -
+                          sumFin S (fun s => pRisk s * posPart (R s - K))) - (cSafe - cRisk)
+    let tailGap := sumFin S (fun s => pRisk s * posPart (D - R s)) -
+                   sumFin S (fun s => pSafe s * posPart (D - R s))
+    agentExpUtil S pSafe R α β K D cSafe - agentExpUtil S pRisk R α β K D cRisk =
+      upsideGap + β * tailGap := by
+  rw [agent_exp_decomp, agent_exp_decomp]
+  grind
+
+def checkAgencyClawback (S : Nat) (α β K D cSafe cRisk margin : Int)
+    (pSafe pRisk R : List Int) : Bool :=
+  let uSafe := agentExpUtil S (fun s => pSafe.getD s.val 0) (fun s => R.getD s.val 0) α β K D cSafe
+  let uRisk := agentExpUtil S (fun s => pRisk.getD s.val 0) (fun s => R.getD s.val 0) α β K D cRisk
+  decide (0 < margin) && decide (margin ≤ uSafe - uRisk)
+
+theorem checkAgencyClawback_sound (S : Nat) (α β K D cSafe cRisk margin : Int)
+    (pSafe pRisk R : List Int)
+    (hChk : checkAgencyClawback S α β K D cSafe cRisk margin pSafe pRisk R = true) :
+    0 < margin ∧
+    agentExpUtil S (fun s => pRisk.getD s.val 0) (fun s => R.getD s.val 0) α β K D cRisk + margin ≤
+      agentExpUtil S (fun s => pSafe.getD s.val 0) (fun s => R.getD s.val 0) α β K D cSafe := by
+  unfold checkAgencyClawback at hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hChk
+  omega
+
+/-- Theorem M21 (Agency-Induced Cantelli Tail Amplification):
+    A riskier distribution with weaker mean reserve `δRisk ≤ δSafe` and higher second moment
+    `S2Safe ≤ S2Risk` raises the model-free Cantelli ruin bound cross-product monotonically. -/
+theorem agency_dro_tail_amplification (W δSafe δRisk S2Safe S2Risk : Int)
+    (hW : 0 < W) (hDR : 0 < δRisk) (hD : δRisk ≤ δSafe)
+    (hS0 : 0 ≤ S2Safe) (hS : S2Safe ≤ S2Risk) :
+    S2Safe * (W * δRisk * δRisk + S2Risk) ≤ S2Risk * (W * δSafe * δSafe + S2Safe) := by
+  have hDSPos : 0 < δSafe := by omega
+  have hR0 : 0 ≤ S2Risk := by omega
+  have hSqR : 0 ≤ δRisk * δRisk := Int.mul_nonneg (by omega) (by omega)
+  have hSq : δRisk * δRisk ≤ δSafe * δSafe := by
+    calc δRisk * δRisk ≤ δRisk * δSafe := Int.mul_le_mul_of_nonneg_left hD (by omega)
+    _ ≤ δSafe * δSafe := Int.mul_le_mul_of_nonneg_right hD (by omega)
+  have h1 : S2Safe * (δRisk * δRisk) ≤ S2Risk * (δRisk * δRisk) :=
+    Int.mul_le_mul_of_nonneg_right hS hSqR
+  have h2 : S2Risk * (δRisk * δRisk) ≤ S2Risk * (δSafe * δSafe) :=
+    Int.mul_le_mul_of_nonneg_left hSq hR0
+  have hWmul : W * (S2Safe * (δRisk * δRisk)) ≤ W * (S2Risk * (δSafe * δSafe)) :=
+    Int.mul_le_mul_of_nonneg_left (Int.le_trans h1 h2) (by omega)
+  grind
+
+/-! ## 7. Pillar 6 — Adverse Selection, Akerlof Death Spiral & Screening (M22–M24) -/
+
+def prefixMass (N : Nat) (w : Fin N → Int) (k : Nat) : Int :=
+  sumFin N (fun i => if i.val < k then w i else 0)
+
+def prefixVal (N : Nat) (w v : Fin N → Int) (k : Nat) : Int :=
+  sumFin N (fun i => if i.val < k then w i * v i else 0)
+
+def iterNat (T : Nat → Nat) : Nat → Nat → Nat
+  | 0, x => x
+  | m + 1, x => T (iterNat T m x)
+
+theorem prefix_avg_monotone (N : Nat) (w v : Fin N → Int) (k1 k2 : Nat)
+    (hk : k1 ≤ k2) (hw : ∀ i, 0 ≤ w i)
+    (hv : ∀ i j : Fin N, i.val ≤ j.val → v i ≤ v j) :
+    prefixVal N w v k1 * prefixMass N w k2 ≤ prefixVal N w v k2 * prefixMass N w k1 := by
+  unfold prefixVal prefixMass
+  let a1 : Fin N → Int := fun i => if i.val < k1 then w i * v i else 0
+  let m1 : Fin N → Int := fun i => if i.val < k1 then w i else 0
+  let a2 : Fin N → Int := fun j => if j.val < k2 then w j * v j else 0
+  let m2 : Fin N → Int := fun j => if j.val < k2 then w j else 0
+  have hL : sumFin N a1 * sumFin N m2 = sumFin N (fun i => sumFin N (fun j => a1 i * m2 j)) := by
+    rw [sumFin_mul_right]
+    apply sumFin_congr
+    intro i
+    rw [sumFin_mul_left]
+  have hR : sumFin N a2 * sumFin N m1 = sumFin N (fun i => sumFin N (fun j => m1 i * a2 j)) := by
+    rw [Int.mul_comm (sumFin N a2) (sumFin N m1), sumFin_mul_right]
+    apply sumFin_congr
+    intro i
+    rw [sumFin_mul_left]
+  rw [hL, hR]
+  have hDiff : sumFin N (fun i => sumFin N (fun j => a1 i * m2 j)) -
+      sumFin N (fun i => sumFin N (fun j => m1 i * a2 j)) ≤ 0 := by
+    have hLow : sumFin N (fun i => sumFin N (fun j =>
+        (if i.val < k1 ∧ j.val < k1 then a1 i * m2 j - m1 i * a2 j else 0))) = 0 := by
+      have hSub : sumFin N (fun i => sumFin N (fun j =>
+          if i.val < k1 ∧ j.val < k1 then w i * v i * w j else 0)) -
+          sumFin N (fun i => sumFin N (fun j =>
+          if i.val < k1 ∧ j.val < k1 then w i * (w j * v j) else 0)) = 0 := by
+        have hSwap : sumFin N (fun i => sumFin N (fun j =>
+            if i.val < k1 ∧ j.val < k1 then w i * (w j * v j) else 0)) =
+            sumFin N (fun j => sumFin N (fun i =>
+            if j.val < k1 ∧ i.val < k1 then w j * v j * w i else 0)) := by
+          rw [sumFin_swap]
+          apply sumFin_congr
+          intro j
+          apply sumFin_congr
+          intro i
+          by_cases hc : i.val < k1 ∧ j.val < k1
+          · simp [hc]; grind
+          · by_cases hc2 : j.val < k1 ∧ i.val < k1
+            · exfalso; exact hc ⟨hc2.2, hc2.1⟩
+            · simp [hc, hc2]
+        rw [hSwap]
+        omega
+      have hSplit1 : ∀ i, sumFin N (fun j =>
+          if i.val < k1 ∧ j.val < k1 then a1 i * m2 j - m1 i * a2 j else 0) =
+          sumFin N (fun j => if i.val < k1 ∧ j.val < k1 then w i * v i * w j else 0) -
+          sumFin N (fun j => if i.val < k1 ∧ j.val < k1 then w i * (w j * v j) else 0) := by
+        intro i
+        rw [← sumFin_sub]
+        apply sumFin_congr
+        intro j
+        dsimp only [a1, m2, m1, a2]
+        by_cases hc : i.val < k1 ∧ j.val < k1
+        · have hj2 : j.val < k2 := by omega
+          simp [hc, hj2]
+        · simp [hc]
+      rw [sumFin_congr hSplit1, sumFin_sub]
+      exact hSub
+    have hUpper : sumFin N (fun i => sumFin N (fun j => a1 i * m2 j - m1 i * a2 j)) ≤
+        sumFin N (fun i => sumFin N (fun j =>
+          if i.val < k1 ∧ j.val < k1 then a1 i * m2 j - m1 i * a2 j else 0)) := by
+      apply sumFin_le_sumFin
+      intro i
+      apply sumFin_le_sumFin
+      intro j
+      dsimp only [a1, m2, m1, a2]
+      by_cases hi1 : i.val < k1
+      · by_cases hj1 : j.val < k1
+        · simp [hi1, hj1]
+        · by_cases hj2 : j.val < k2
+          · simp only [hi1, hj2, hj1, and_false, ↓reduceIte]
+            have hij : i.val ≤ j.val := by omega
+            have hvij : v i ≤ v j := hv i j hij
+            have hm : 0 ≤ w i * w j := Int.mul_nonneg (hw i) (hw j)
+            have hmul := Int.mul_le_mul_of_nonneg_left hvij hm
+            grind
+          · simp [hi1, hj1, hj2]
+      · simp [hi1]
+    rw [← sumFin_sub]
+    have hCon : sumFin N (fun i => sumFin N (fun j => a1 i * m2 j) - sumFin N (fun j => m1 i * a2 j)) =
+        sumFin N (fun i => sumFin N (fun j => a1 i * m2 j - m1 i * a2 j)) := by
+      apply sumFin_congr
+      intro i
+      rw [sumFin_sub]
+    rw [hCon]
+    omega
+  omega
+
+private theorem iterNat_bound (T : Nat → Nat) (N : Nat) (h0 : T 0 = 0)
+    (hDec : ∀ k, 0 < k → k ≤ N → T k < k) :
+    ∀ m x, x ≤ N → iterNat T m x + m ≤ x ∨ iterNat T m x = 0 := by
+  intro m
+  induction m with
+  | zero =>
+    intro x hx
+    left; simp [iterNat]
+  | succ m ih =>
+    intro x hx
+    obtain hB | hZ := ih x hx
+    · by_cases hy : iterNat T m x = 0
+      · right; simp [iterNat, hy, h0]
+      · have hyPos : 0 < iterNat T m x := by omega
+        have hyLe : iterNat T m x ≤ N := by omega
+        have hStep := hDec (iterNat T m x) hyPos hyLe
+        left
+        change T (iterNat T m x) + (m + 1) ≤ x
+        omega
+    · right; simp [iterNat, hZ, h0]
+
+/-- Theorem M22 (Akerlof Death Spiral Monotone Unraveling):
+    Whenever each nonempty quality pool loses at least its marginal tier (`T k < k` for `0 < k ≤ N`),
+    the discrete market unravels completely to `0` within at most `N` rounds. -/
+theorem akerlof_death_spiral_monotone_unraveling (T : Nat → Nat) (N : Nat)
+    (h0 : T 0 = 0) (hDec : ∀ k, 0 < k → k ≤ N → T k < k) :
+    iterNat T N N = 0 := by
+  obtain h | h := iterNat_bound T N h0 hDec N N (Nat.le_refl N)
+  · omega
+  · exact h
+
+/-- Theorem M23 (Platform Take-Rate Safety Margin):
+    If an equilibrium quality pool `1..kEq` is individually rational for all participating tiers
+    at critical take-rate `rStar`, then it remains strictly/weakly sustained for all lower take-rates
+    `r ≤ rStar` with nonnegative safety margin `rStar - r`. -/
+theorem platform_take_rate_safety_margin (N kEq : Nat) (scale r rStar : Int)
+    (w v c : Fin N → Int)
+    (_hScale : 0 < scale) (hr : r ≤ rStar) (_hrS : rStar ≤ scale)
+    (_hk : 1 ≤ kEq ∧ kEq ≤ N) (hVal : 0 ≤ prefixVal N w v kEq)
+    (hCrit : ∀ i : Fin N, i.val < kEq →
+      c i * (scale * prefixMass N w kEq) ≤ (scale - rStar) * prefixVal N w v kEq) :
+    0 ≤ rStar - r ∧
+    ∀ i : Fin N, i.val < kEq →
+      c i * (scale * prefixMass N w kEq) ≤ (scale - r) * prefixVal N w v kEq := by
+  refine ⟨by omega, ?_⟩
+  intro i hi
+  have hc := hCrit i hi
+  have hRate : scale - rStar ≤ scale - r := by omega
+  have hMul := Int.mul_le_mul_of_nonneg_right hRate hVal
+  exact Int.le_trans hc hMul
+
+def checkPlatformMargin (N kEq : Nat) (scale r rStar : Int)
+    (w v c : List Int) : Bool :=
+  let fw : Fin N → Int := fun i => w.getD i.val 0
+  let fv : Fin N → Int := fun i => v.getD i.val 0
+  let fc : Fin N → Int := fun i => c.getD i.val 0
+  let mass := prefixMass N fw kEq
+  let val := prefixVal N fw fv kEq
+  decide (0 < scale && 0 ≤ r && r ≤ rStar && rStar ≤ scale && 1 ≤ kEq && kEq ≤ N && 0 < mass && 0 ≤ val) &&
+  allFinB N (fun i => decide (kEq ≤ i.val || fc i * (scale * mass) ≤ (scale - rStar) * val))
+
+theorem checkPlatformMargin_sound (N kEq : Nat) (scale r rStar : Int)
+    (w v c : List Int)
+    (hChk : checkPlatformMargin N kEq scale r rStar w v c = true) :
+    0 ≤ rStar - r ∧
+    ∀ i : Fin N, i.val < kEq →
+      c.getD i.val 0 * (scale * prefixMass N (fun k => w.getD k.val 0) kEq) ≤
+        (scale - r) * prefixVal N (fun k => w.getD k.val 0) (fun k => v.getD k.val 0) kEq := by
+  unfold checkPlatformMargin at hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hChk
+  obtain ⟨⟨⟨⟨⟨⟨⟨_, _⟩, hr⟩, hrS⟩, hk1⟩, hk2⟩, _⟩, hVal⟩ := hChk.1
+  have hCrit : ∀ i : Fin N, i.val < kEq →
+      c.getD i.val 0 * (scale * prefixMass N (fun k => w.getD k.val 0) kEq) ≤
+        (scale - rStar) * prefixVal N (fun k => w.getD k.val 0) (fun k => v.getD k.val 0) kEq := by
+    intro i hi
+    have hBi := of_decide_eq_true (allFinB_true N _ hChk.2 i)
+    simp only [Bool.or_eq_true, decide_eq_true_eq] at hBi
+    cases hBi with
+    | inl hge => omega
+    | inr hok => exact hok
+  exact platform_take_rate_safety_margin N kEq scale r rStar
+    (fun k => w.getD k.val 0) (fun k => v.getD k.val 0) (fun k => c.getD k.val 0)
+    (by omega) hr hrS ⟨hk1, hk2⟩ hVal hCrit
+
+def screenUtil (scale q c P B : Int) : Int :=
+  scale * (P - c) - q * B
+
+/-- Theorem M24 (Bond/Deductible Screening Separation IC & IR):
+    Under single-crossing marginal bond costs `0 ≤ qH < qL`, any menu `(PH, BH)` / `(PL, BL)`
+    satisfying incentive compatibility implements monotone separation `BL ≤ BH` and `PL ≤ PH`. -/
+theorem screening_deductible_separation_ic (scale qH qL cH cL PH PL BH BL : Int)
+    (hScale : 0 < scale) (hQ0 : 0 ≤ qH) (hQ : qH < qL)
+    (_hIrH : 0 ≤ screenUtil scale qH cH PH BH)
+    (_hIrL : 0 ≤ screenUtil scale qL cL PL BL)
+    (hIcH : screenUtil scale qH cH PL BL ≤ screenUtil scale qH cH PH BH)
+    (hIcL : screenUtil scale qL cL PH BH ≤ screenUtil scale qL cL PL BL) :
+    BL ≤ BH ∧ 0 ≤ (qL - qH) * (BH - BL) ∧ PL ≤ PH := by
+  unfold screenUtil at hIcH hIcL
+  have hSum : (qL - qH) * (BH - BL) =
+      (scale * (PH - cH) - qH * BH - (scale * (PL - cH) - qH * BL)) +
+      (scale * (PL - cL) - qL * BL - (scale * (PH - cL) - qL * BH)) := by
+    grind
+  have hDiffNonneg : 0 ≤ (qL - qH) * (BH - BL) := by omega
+  have hBond : BL ≤ BH := by
+    by_cases hlt : BH < BL
+    · have hPos : 0 < qL - qH := by omega
+      have hNeg : BH - BL < 0 := by omega
+      have hProd : (qL - qH) * (BH - BL) < 0 := Int.mul_neg_of_pos_of_neg hPos hNeg
+      omega
+    · omega
+  have hPay : PL ≤ PH := by
+    have hBdiff : 0 ≤ BH - BL := by omega
+    have hQmul : 0 ≤ qH * (BH - BL) := Int.mul_nonneg hQ0 hBdiff
+    have hSdiff : qH * (BH - BL) ≤ scale * (PH - PL) := by
+      grind
+    have hSnonneg : 0 ≤ scale * (PH - PL) := by omega
+    by_cases hplt : PH < PL
+    · have hNeg : PH - PL < 0 := by omega
+      have hProd : scale * (PH - PL) < 0 := Int.mul_neg_of_pos_of_neg hScale hNeg
+      omega
+    · omega
+  exact ⟨hBond, hDiffNonneg, hPay⟩
+
+def checkScreeningMenu (scale qH qL cH cL PH PL BH BL : Int) : Bool :=
+  decide (0 < scale && 0 ≤ qH && qH < qL &&
+    0 ≤ screenUtil scale qH cH PH BH && 0 ≤ screenUtil scale qL cL PL BL &&
+    screenUtil scale qH cH PL BL ≤ screenUtil scale qH cH PH BH &&
+    screenUtil scale qL cL PH BH ≤ screenUtil scale qL cL PL BL)
+
+theorem checkScreeningMenu_sound (scale qH qL cH cL PH PL BH BL : Int)
+    (hChk : checkScreeningMenu scale qH qL cH cL PH PL BH BL = true) :
+    BL ≤ BH ∧ PL ≤ PH ∧
+    0 ≤ screenUtil scale qH cH PH BH ∧ 0 ≤ screenUtil scale qL cL PL BL := by
+  unfold checkScreeningMenu at hChk
+  have h := of_decide_eq_true hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+  have hSep := screening_deductible_separation_ic scale qH qL cH cL PH PL BH BL
+    h.1.1.1.1.1.1 h.1.1.1.1.1.2 h.1.1.1.1.2 h.1.1.1.2 h.1.1.2 h.1.2 h.2
+  exact ⟨hSep.1, hSep.2.2, h.1.1.1.2, h.1.1.2⟩
+
+/-! ## 8. Pillar 7 — Endogenous Margin-Liquidation Paradox & Supply-Chain Horizon (M25–M27) -/
+
+def liqPriceInt (n : Nat) (scale P0 Pmin alpha : Int) (h : List Int)
+    (trig : Fin n → Int) : Int :=
+  maxInt Pmin (P0 - alpha * sumFin n (fun i => h.getD i.val 0 * trig i) / scale)
+
+def marginStepInt (n : Nat) (scale P0 Pmin alpha theta : Int) (h d c : List Int)
+    (trig : Fin n → Int) : Fin n → Int := fun i =>
+  let P := liqPriceInt n scale P0 Pmin alpha h trig
+  if (scale - theta) * P * h.getD i.val 0 + scale * c.getD i.val 0 < scale * d.getD i.val 0
+  then 1 else 0
+
+def marginBadDebt (n : Nat) (scale P0 Pmin alpha : Int) (h d c : List Int)
+    (trig : Fin n → Int) : Int :=
+  let P := liqPriceInt n scale P0 Pmin alpha h trig
+  sumFin n (fun i => posPart (d.getD i.val 0 - c.getD i.val 0 - P * h.getD i.val 0))
+
+/-- Theorem M25 (Liquidation Cascade Tarski Cliff):
+    Every trigger fixed point of a monotone margin-liquidation map lies inside `[F^k(0), F^k(1)]`,
+    and any certified `checkMarginCascade` witness matches exact fixed-point triggers and bad debt. -/
+theorem liquidation_cascade_tarski_cliff (n : Nat) (F : (Fin n → Int) → (Fin n → Int))
+    (hMono : vecMonotone n F) (tStar : Fin n → Int)
+    (hBounds : vecLe n (fun _ => 0) tStar ∧ vecLe n tStar (fun _ => 1))
+    (hFix : F tStar = tStar) (k : Nat) :
+    vecLe n (iterVecMap n F k (fun _ => 0)) tStar ∧
+    vecLe n tStar (iterVecMap n F k (fun _ => 1)) :=
+  iterVecMap_preserves_bracket n F hMono (fun _ => 0) (fun _ => 1) tStar hBounds.1 hBounds.2 hFix k
+
+def checkMarginCascade (n : Nat) (scale P0 Pmin alpha theta badDebt : Int)
+    (h d c trig : List Int) : Bool :=
+  let vt : Fin n → Int := fun i => trig.getD i.val 0
+  let step := marginStepInt n scale P0 Pmin alpha theta h d c vt
+  decide (0 < scale) &&
+  allFinB n (fun i => decide (vt i = 0 ∨ vt i = 1) && decide (step i = vt i)) &&
+  decide (badDebt = marginBadDebt n scale P0 Pmin alpha h d c vt)
+
+theorem checkMarginCascade_sound (n : Nat) (scale P0 Pmin alpha theta badDebt : Int)
+    (h d c trig : List Int)
+    (hChk : checkMarginCascade n scale P0 Pmin alpha theta badDebt h d c trig = true) :
+    0 < scale ∧
+    (∀ i : Fin n, marginStepInt n scale P0 Pmin alpha theta h d c (fun j => trig.getD j.val 0) i = trig.getD i.val 0) ∧
+    badDebt = marginBadDebt n scale P0 Pmin alpha h d c (fun j => trig.getD j.val 0) := by
+  unfold checkMarginCascade at hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hChk
+  refine ⟨hChk.1.1, ?_, hChk.2⟩
+  intro i
+  have hi := allFinB_true n _ hChk.1.2 i
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at hi
+  exact hi.2
+
+/-- Theorem M26 (Micro-Macro Safety Paradox Constructive Witness):
+    Increasing the maintenance margin ratio from `θ1 = 10` to `θ2 = 30` raises each single account's
+    pre-impact equity buffer (`1000 < 3000`), yet strictly worsens equilibrium stability from
+    `0` triggered liquidations & `0` bad debt to full 4-account cascade failure (`17200` bad debt). -/
+theorem micro_macro_safety_paradox_witness :
+    let scale : Int := 100
+    let P0 : Int := 100
+    let Pmin : Int := 10
+    let alpha : Int := 20
+    let θ1 : Int := 10
+    let θ2 : Int := 30
+    let h : List Int := [100, 100, 100, 100]
+    let d : List Int := [7800, 6800, 5800, 4800]
+    let c : List Int := [0, 0, 0, 0]
+    let eq1 : List Int := [0, 0, 0, 0]
+    let eq2 : List Int := [1, 1, 1, 1]
+    θ1 < θ2 ∧
+    θ1 * P0 * h.getD 0 0 < θ2 * P0 * h.getD 0 0 ∧
+    checkMarginCascade 4 scale P0 Pmin alpha θ1 0 h d c eq1 = true ∧
+    checkMarginCascade 4 scale P0 Pmin alpha θ2 17200 h d c eq2 = true := by
+  decide
+
+/-- Theorem M27 (Supply-Chain Credit Horizon & Working-Capital Bound):
+    If every firm `i` maintains working-capital buffer covering net payables outflow plus shock
+    (`(pBar_i + shock_i) * scale ≤ ext_i * scale + ∑_j pi_{j,i} * pBar_j`), then full chain
+    settlement `pBar` suffers zero defaults under `shock`. -/
+theorem supply_chain_credit_horizon_bound (n : Nat) (scale : Int)
+    (pBar ext shock : Fin n → Int) (piScaled : Fin n → Fin n → Int)
+    (hScale : 0 < scale) (_hBarPos : ∀ i, 0 ≤ pBar i)
+    (hHorizon : ∀ i, (pBar i + shock i) * scale ≤
+      ext i * scale + sumFin n (fun j => piScaled j i * pBar j)) :
+    ∀ i, minInt (pBar i) ((ext i - shock i) + sumFin n (fun j => piScaled j i * pBar j) / scale) = pBar i := by
+  intro i
+  have hs := hHorizon i
+  have hDiv : pBar i ≤ (ext i - shock i) + sumFin n (fun j => piScaled j i * pBar j) / scale := by
+    have h1 : (pBar i - (ext i - shock i)) * scale ≤ sumFin n (fun j => piScaled j i * pBar j) := by
+      grind
+    have hEd := Int.ediv_le_ediv hScale h1
+    have hCancel : (pBar i - (ext i - shock i)) * scale / scale = pBar i - (ext i - shock i) :=
+      Int.mul_ediv_cancel _ (by omega)
+    rw [hCancel] at hEd
+    omega
+  unfold minInt
+  simp [hDiv]
+
+def checkSupplyChainMargin (n : Nat) (scale : Int) (pBar ext shock : List Int)
+    (piScaled : List (List Int)) : Bool :=
+  (0 < scale) &&
+  allFinB n (fun i =>
+    let pb := pBar.getD i.val 0
+    let sh := shock.getD i.val 0
+    let rhs := ext.getD i.val 0 * scale +
+      sumFin n (fun j => (piScaled.getD j.val []).getD i.val 0 * pBar.getD j.val 0)
+    decide (0 ≤ pb && 0 ≤ sh && (pb + sh) * scale ≤ rhs))
+
+theorem checkSupplyChainMargin_sound (n : Nat) (scale : Int) (pBar ext shock : List Int)
+    (piScaled : List (List Int))
+    (hChk : checkSupplyChainMargin n scale pBar ext shock piScaled = true) :
+    ∀ i : Fin n,
+      0 ≤ shock.getD i.val 0 ∧
+      minInt (pBar.getD i.val 0) ((ext.getD i.val 0 - shock.getD i.val 0) +
+        sumFin n (fun j => (piScaled.getD j.val []).getD i.val 0 * pBar.getD j.val 0) / scale) =
+        pBar.getD i.val 0 := by
+  unfold checkSupplyChainMargin at hChk
+  simp only [Bool.and_eq_true] at hChk
+  have hScale : 0 < scale := of_decide_eq_true hChk.1
+  intro i
+  have hi := of_decide_eq_true (allFinB_true n _ hChk.2 i)
+  simp only [decide_eq_true_eq] at hi
+  refine ⟨hi.1.2, ?_⟩
+  exact supply_chain_credit_horizon_bound n scale
+    (fun k => pBar.getD k.val 0) (fun k => ext.getD k.val 0) (fun k => shock.getD k.val 0)
+    (fun r c => (piScaled.getD r.val []).getD c.val 0)
+    hScale (fun k => by
+      have hk := of_decide_eq_true (allFinB_true n _ hChk.2 k)
+      simp only [decide_eq_true_eq] at hk
+      exact hk.1.1)
+    (fun k => by
+      have hk := of_decide_eq_true (allFinB_true n _ hChk.2 k)
+      simp only [decide_eq_true_eq] at hk
+      exact hk.2) i
+
+/-! ## 9. Pillar 8 — Unified 3D Institutional Safety-Margin Theory (M28–M30) -/
+
+structure SafetyMargin3D where
+  mInc : Int
+  mDro : Int
+  mSys : Int
+
+def masterSafetyIndex (m : SafetyMargin3D) : Int :=
+  minInt m.mInc (minInt m.mDro m.mSys)
+
+/-- Theorem M28 (3D Institutional Safety-Margin Weakest-Link Characterization):
+    An institution achieves positive overall safety margin iff all three dimensions
+    (Incentive/Strategic, Model-Free DRO/Tail, Systemic/Bifurcation) are strictly positive. -/
+theorem institution_3d_safety_margin_sound (m : SafetyMargin3D) :
+    0 < masterSafetyIndex m ↔ (0 < m.mInc ∧ 0 < m.mDro ∧ 0 < m.mSys) := by
+  unfold masterSafetyIndex minInt
+  split <;> split <;> omega
+
+def checkInstitution3D (mInc mDro mSys master : Int) : Bool :=
+  decide (master = masterSafetyIndex ⟨mInc, mDro, mSys⟩ && 0 < master)
+
+theorem checkInstitution3D_sound (mInc mDro mSys master : Int)
+    (hChk : checkInstitution3D mInc mDro mSys master = true) :
+    master = masterSafetyIndex ⟨mInc, mDro, mSys⟩ ∧
+    0 < mInc ∧ 0 < mDro ∧ 0 < mSys := by
+  unfold checkInstitution3D at hChk
+  have h := of_decide_eq_true hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+  have h3d := (institution_3d_safety_margin_sound ⟨mInc, mDro, mSys⟩).1 (by omega)
+  exact ⟨h.1, h3d⟩
+
+/-- Theorem M29 (Composite Exploit Dominance / Weakest-Link Law):
+    If any single dimension has nonpositive safety margin (`≤ 0`), inflating the remaining
+    two dimensions arbitrarily cannot yield a positive composite institutional margin. -/
+theorem composite_exploit_dominance (m : SafetyMargin3D) :
+    (m.mInc ≤ 0 → ∀ d2 d3 : Int, masterSafetyIndex ⟨m.mInc, m.mDro + d2, m.mSys + d3⟩ ≤ 0) ∧
+    (m.mDro ≤ 0 → ∀ d1 d3 : Int, masterSafetyIndex ⟨m.mInc + d1, m.mDro, m.mSys + d3⟩ ≤ 0) ∧
+    (m.mSys ≤ 0 → ∀ d1 d2 : Int, masterSafetyIndex ⟨m.mInc + d1, m.mDro + d2, m.mSys⟩ ≤ 0) := by
+  refine ⟨?_, ?_, ?_⟩ <;> {
+    intro h dA dB
+    unfold masterSafetyIndex minInt
+    dsimp only
+    split <;> split <;> omega
+  }
+
+/-- Theorem M30 (Minimal Institutional Repair Sufficiency & Optimality):
+    Any nonnegative repair `(d1, d2, d3)` reaching target margin `T` guarantees `T ≤ masterSafetyIndex`
+    and costs at least `c1*posPart(T - mInc) + c2*posPart(T - mDro) + c3*posPart(T - mSys)`. -/
+theorem minimal_institutional_repair_sound (m : SafetyMargin3D) (T c1 c2 c3 d1 d2 d3 : Int)
+    (hc1 : 0 ≤ c1) (hc2 : 0 ≤ c2) (hc3 : 0 ≤ c3)
+    (hd10 : 0 ≤ d1) (hd20 : 0 ≤ d2) (hd30 : 0 ≤ d3)
+    (hr1 : T ≤ m.mInc + d1) (hr2 : T ≤ m.mDro + d2) (hr3 : T ≤ m.mSys + d3) :
+    T ≤ masterSafetyIndex ⟨m.mInc + d1, m.mDro + d2, m.mSys + d3⟩ ∧
+    c1 * posPart (T - m.mInc) + c2 * posPart (T - m.mDro) + c3 * posPart (T - m.mSys) ≤
+      c1 * d1 + c2 * d2 + c3 * d3 := by
+  have hMaster : T ≤ masterSafetyIndex ⟨m.mInc + d1, m.mDro + d2, m.mSys + d3⟩ := by
+    unfold masterSafetyIndex minInt
+    split <;> split <;> omega
+  have hp1 : posPart (T - m.mInc) ≤ d1 := by unfold posPart; split <;> omega
+  have hp2 : posPart (T - m.mDro) ≤ d2 := by unfold posPart; split <;> omega
+  have hp3 : posPart (T - m.mSys) ≤ d3 := by unfold posPart; split <;> omega
+  have hm1 := Int.mul_le_mul_of_nonneg_left hp1 hc1
+  have hm2 := Int.mul_le_mul_of_nonneg_left hp2 hc2
+  have hm3 := Int.mul_le_mul_of_nonneg_left hp3 hc3
+  exact ⟨hMaster, by omega⟩
+
+def checkMinimalRepair (mInc mDro mSys T c1 c2 c3 d1 d2 d3 cost : Int) : Bool :=
+  decide (0 < T && 0 ≤ c1 && 0 ≤ c2 && 0 ≤ c3 &&
+    0 ≤ d1 && 0 ≤ d2 && 0 ≤ d3 &&
+    T ≤ mInc + d1 && T ≤ mDro + d2 && T ≤ mSys + d3 &&
+    d1 = posPart (T - mInc) && d2 = posPart (T - mDro) && d3 = posPart (T - mSys) &&
+    cost = c1 * d1 + c2 * d2 + c3 * d3)
+
+theorem checkMinimalRepair_sound (mInc mDro mSys T c1 c2 c3 d1 d2 d3 cost : Int)
+    (hChk : checkMinimalRepair mInc mDro mSys T c1 c2 c3 d1 d2 d3 cost = true) :
+    0 < masterSafetyIndex ⟨mInc + d1, mDro + d2, mSys + d3⟩ ∧
+    cost = c1 * posPart (T - mInc) + c2 * posPart (T - mDro) + c3 * posPart (T - mSys) := by
+  unfold checkMinimalRepair at hChk
+  have h := of_decide_eq_true hChk
+  simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+  have hM := minimal_institutional_repair_sound ⟨mInc, mDro, mSys⟩ T c1 c2 c3 d1 d2 d3
+    h.1.1.1.1.1.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.1.2
+    h.1.1.1.1.1.1.2
+    h.1.1.1.1.1.2
+    h.1.1.1.1.2
+  have hT : 0 < T := h.1.1.1.1.1.1.1.1.1.1.1.1.1
+  dsimp only at hM
+  refine ⟨by omega, ?_⟩
+  rw [← h.1.1.1.2, ← h.1.1.2, ← h.1.2]
+  exact h.2
 
 end EconCert

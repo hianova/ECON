@@ -12,7 +12,7 @@ on:
 
 jobs:
   verify-econ:
-    name: Formal Zero-FP-Trust Econ, MOT/SOS, DRO, Clearing, VCG & Ring-0 (${{ matrix.os }})
+    name: ECON v2.0.0 Institutional Safety-Margin, 30 Lean 4 Thms & Ring-0 (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -52,6 +52,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang
 
-      - name: Run All ECON v1.0.0 Formal, Ring-0 & Oracle Gates
+      - name: Run All ECON v2.0.0 Formal, Ring-0, Institutional DRC & Experiment Gates
         run: |
-          make -C ECON clean && make -C ECON verify
+          make -C ECON clean && make -C ECON verify && make -C ECON experiments

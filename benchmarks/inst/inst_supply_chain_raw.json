@@ -1,0 +1,15 @@
+{
+  "institution_name": "MegaOEM_LongTerms_Raw",
+  "institution_type": "supply_chain",
+  "target_margin_bps": 500.0,
+  "c_inc": 1.0,
+  "c_dro": 1.0,
+  "c_sys": 1.8,
+  "inc_ref_path": "",
+  "dro_ref_path": "benchmarks/actuary/credit_portfolio_5d.json",
+  "sys_ref_path": "benchmarks/margin/supply_chain_tier3_10firm.json",
+  "tau_override": 2.5,
+  "dro_reserve_mult": 1.0,
+  "bailout_buffer": 0.0,
+  "chain_fee_bps": 500.0
+}

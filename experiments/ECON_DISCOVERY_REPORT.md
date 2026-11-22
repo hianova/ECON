@@ -1,6 +1,6 @@
-# ECON v1.0.0 Scientific Discovery & Certification Report
+# ECON v2.0.0 Foundations Discovery Report (Pillars 1–4, `M1–M18`)
 
-All numerical results below are measured directly by executing the four pure-stdlib experiment scripts in `experiments/` against `build/econ_cli` and `EconFastSession` (`ctypes` persistent session over `build/libecon.dylib`), with zero external numerical Python dependencies. Every emitted `.econcert.json` certificate passed exact 128-bit integer `cert-verify`.
+All numerical results below are measured directly by executing `experiments/exp1..exp4` (pure-stdlib Python scripts against `build/econ_cli` and `EconFastSession` over `build/libecon.{dylib,so}`), covering Pillars 1–4 (`M1–M18`). For Pillars 5–8 & Commercial Institutional DRC/LVS Audits (`exp5–exp8`, `M19–M30`), see [ECON_INSTITUTIONAL_REPORT.md](ECON_INSTITUTIONAL_REPORT.md). Every emitted `.econcert.json` certificate passed exact 128-bit integer `cert-verify`.
 
 ---
 

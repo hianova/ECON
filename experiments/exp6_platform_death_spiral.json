@@ -1,0 +1,374 @@
+{
+  "platform_sweep": [
+    {
+      "take_rate": 0.0,
+      "k_eq": 8,
+      "surviving_mass_frac": 0.8,
+      "eq_pool_price": 55.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.25
+    },
+    {
+      "take_rate": 0.05,
+      "k_eq": 6,
+      "surviving_mass_frac": 0.6,
+      "eq_pool_price": 45.0,
+      "platform_revenue": 13.5,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.2
+    },
+    {
+      "take_rate": 0.1,
+      "k_eq": 5,
+      "surviving_mass_frac": 0.5,
+      "eq_pool_price": 40.0,
+      "platform_revenue": 20.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.15
+    },
+    {
+      "take_rate": 0.15,
+      "k_eq": 5,
+      "surviving_mass_frac": 0.5,
+      "eq_pool_price": 40.0,
+      "platform_revenue": 30.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.1
+    },
+    {
+      "take_rate": 0.2,
+      "k_eq": 4,
+      "surviving_mass_frac": 0.4,
+      "eq_pool_price": 35.0,
+      "platform_revenue": 28.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.04999999999999999
+    },
+    {
+      "take_rate": 0.22,
+      "k_eq": 3,
+      "surviving_mass_frac": 0.3,
+      "eq_pool_price": 30.0,
+      "platform_revenue": 19.8,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.03
+    },
+    {
+      "take_rate": 0.25,
+      "k_eq": 1,
+      "surviving_mass_frac": 0.1,
+      "eq_pool_price": 20.0,
+      "platform_revenue": 5.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.0
+    },
+    {
+      "take_rate": 0.26,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.010000000000000009
+    },
+    {
+      "take_rate": 0.28,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.030000000000000027
+    },
+    {
+      "take_rate": 0.3,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.04999999999999999
+    },
+    {
+      "take_rate": 0.35,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.09999999999999998
+    },
+    {
+      "take_rate": 0.4,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.15000000000000002
+    },
+    {
+      "take_rate": 0.45,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.2
+    },
+    {
+      "take_rate": 0.5,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.25
+    }
+  ],
+  "spiral_sweep": [
+    {
+      "take_rate": 0.0,
+      "k_eq": 6,
+      "surviving_mass_frac": 0.75,
+      "eq_pool_price": 45.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.25
+    },
+    {
+      "take_rate": 0.05,
+      "k_eq": 5,
+      "surviving_mass_frac": 0.625,
+      "eq_pool_price": 40.0,
+      "platform_revenue": 10.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.2
+    },
+    {
+      "take_rate": 0.1,
+      "k_eq": 4,
+      "surviving_mass_frac": 0.5,
+      "eq_pool_price": 35.0,
+      "platform_revenue": 14.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.15
+    },
+    {
+      "take_rate": 0.15,
+      "k_eq": 3,
+      "surviving_mass_frac": 0.375,
+      "eq_pool_price": 30.0,
+      "platform_revenue": 13.5,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.1
+    },
+    {
+      "take_rate": 0.2,
+      "k_eq": 3,
+      "surviving_mass_frac": 0.375,
+      "eq_pool_price": 30.0,
+      "platform_revenue": 18.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.04999999999999999
+    },
+    {
+      "take_rate": 0.22,
+      "k_eq": 2,
+      "surviving_mass_frac": 0.25,
+      "eq_pool_price": 25.0,
+      "platform_revenue": 11.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.03
+    },
+    {
+      "take_rate": 0.25,
+      "k_eq": 1,
+      "surviving_mass_frac": 0.125,
+      "eq_pool_price": 20.0,
+      "platform_revenue": 5.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.0
+    },
+    {
+      "take_rate": 0.26,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.010000000000000009
+    },
+    {
+      "take_rate": 0.28,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.030000000000000027
+    },
+    {
+      "take_rate": 0.3,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.04999999999999999
+    },
+    {
+      "take_rate": 0.35,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.09999999999999998
+    },
+    {
+      "take_rate": 0.4,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.15000000000000002
+    },
+    {
+      "take_rate": 0.45,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.2
+    },
+    {
+      "take_rate": 0.5,
+      "k_eq": 0,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.25
+    }
+  ],
+  "cert_cases": [
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 5,
+      "unravel_rounds": 4,
+      "take_rate": 0.1,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.15,
+      "surviving_mass_frac": 0.5,
+      "eq_pool_price": 40.0,
+      "platform_revenue": 20.0,
+      "total_welfare": 81.0,
+      "full_collapse": 0,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 5,
+      "unravel_rounds": 3,
+      "take_rate": 0.15,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.1,
+      "surviving_mass_frac": 0.5,
+      "eq_pool_price": 40.0,
+      "platform_revenue": 30.0,
+      "total_welfare": 81.0,
+      "full_collapse": 0,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 4,
+      "unravel_rounds": 3,
+      "take_rate": 0.2,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.05,
+      "surviving_mass_frac": 0.4,
+      "eq_pool_price": 35.0,
+      "platform_revenue": 28.0,
+      "total_welfare": 55.0,
+      "full_collapse": 0,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 1,
+      "unravel_rounds": 5,
+      "take_rate": 0.25,
+      "critical_r_star": 0.25,
+      "safety_margin_r": 0.0,
+      "surviving_mass_frac": 0.1,
+      "eq_pool_price": 20.0,
+      "platform_revenue": 5.0,
+      "total_welfare": 5.0,
+      "full_collapse": 0,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 0,
+      "unravel_rounds": 6,
+      "take_rate": 0.26,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.01,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "total_welfare": 0.0,
+      "full_collapse": 1,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "platform_marketplace",
+      "n_types": 10,
+      "k_eq": 0,
+      "unravel_rounds": 5,
+      "take_rate": 0.35,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.1,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "total_welfare": 0.0,
+      "full_collapse": 1,
+      "screening_valid": 1,
+      "screened_r_star": 0.4
+    },
+    {
+      "scenario": "insurance_death_spiral",
+      "n_types": 8,
+      "k_eq": 0,
+      "unravel_rounds": 3,
+      "take_rate": 0.42,
+      "critical_r_star": 0.25,
+      "safety_margin_r": -0.17,
+      "surviving_mass_frac": 0.0,
+      "eq_pool_price": 0.0,
+      "platform_revenue": 0.0,
+      "total_welfare": 0.0,
+      "full_collapse": 1,
+      "screening_valid": 0,
+      "screened_r_star": 0.25
+    }
+  ],
+  "certs_verified": 7,
+  "certs_total": 7
+}

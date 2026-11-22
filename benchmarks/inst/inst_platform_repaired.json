@@ -1,0 +1,15 @@
+{
+  "institution_name": "BazaarX_Screened_Repaired",
+  "institution_type": "platform_adverse",
+  "target_margin_bps": 500.0,
+  "c_inc": 1.2,
+  "c_dro": 1.0,
+  "c_sys": 1.0,
+  "inc_ref_path": "benchmarks/adverse/platform_marketplace.json",
+  "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+  "sys_ref_path": "",
+  "take_override": 0.15,
+  "dro_reserve_mult": 3.2,
+  "bailout_buffer": 0.0,
+  "chain_fee_bps": 500.0
+}

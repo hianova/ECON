@@ -1,51 +1,68 @@
-# ECON (`v1.0.0`)
+# ECON (`v2.0.0`)
 
-**Formal Zero-Floating-Point-Trust Economics, Model-Free Finance, Actuarial DRO, Systemic Clearing & Ring-0 Market Engine**
+[![CI](https://github.com/hianova/ECON/actions/workflows/ci.yml/badge.svg)](https://github.com/hianova/ECON/actions/workflows/ci.yml)
 
-`ECON v1.0.0` pairs a formally verified Lean 4 mathematical kernel ([`lean/EconCert.lean`](lean/EconCert.lean), **18 theorems `M1–M18`**, zero `sorryAx`, zero `Lean.ofReduceBool`, audited by `leanchecker`) with a pure C17 numerical solver core (`src/econ_*.c`), deterministic `__int128` verification (`cert-verify`), an independent pure-stdlib Python golden oracle (`oracles/`), and a Ring-0 Pure-GPR TAIFEX hardware layer ([`Econ.lean`](Econ.lean)) that **absorbs and upgrades `../SNIPER`**.
+**Institutional Safety-Margin Theory & Formal Commercial DRC/LVS Sign-Off Engine**
+
+`ECON v2.0.0` unifies formal economics, model-free finance, actuarial tail DRO, macro-prudential systemic clearing, contract/agency theory, adverse-selection phase transitions, and Ring-0 Pure-GPR execution around one central thesis:
+
+$$\mathbf{M}(\mathcal{I}) = (m_{\text{inc}},\, m_{\text{dro}},\, m_{\text{sys}}), \qquad M^*(\mathcal{I}) = \min(m_{\text{inc}},\, m_{\text{dro}},\, m_{\text{sys}})$$
+
+> Commercial institutions rarely fail merely because of exogenous luck; they fail when institutional rules drive one of the three safety margins below zero — strategic/incentive exploitability ($m_{\text{inc}}$), distributional model misspecification ($m_{\text{dro}}$), or systemic bifurcation/contagion cliffs ($m_{\text{sys}}$).
+
+`ECON` acts as a **Formal Commercial DRC / LVS Sign-Off & Red-Team Auditor**, pairing a **30-theorem Lean 4 kernel** ([`lean/EconCert.lean`](lean/EconCert.lean), `M1–M30`, zero `sorryAx`, zero `Lean.ofReduceBool`, audited by `leanchecker`) with a portable C17 Zero-FP-Trust `__int128` verification core, a Ring-0 Pure-GPR TAIFEX hardware layer ([`Econ.lean`](Econ.lean) absorbing and upgrading legacy `SNIPER`), and 8 end-to-end discovery experiments.
 
 ---
 
-## 1. Architecture Overview
+## 1. Architecture Overview (55% Formal Theory / 35% C17 Core / 10% Ring-0)
 
-| Layer | Module | Role & Guarantees |
+| Layer | Module | Role & Certified Guarantees |
 | :--- | :--- | :--- |
-| **Formal Kernel (SSOT)** | [`lean/EconCert.lean`](lean/EconCert.lean) (`import Flow.Interval` only) | Proves 18 theorems (`M1–M18`) with standard axioms only: Cholesky-SDD PSD (`M1–M3`), exact integer LP Weak Duality (`M4`), VCG DSIC & IR (`M5–M6`), Discrete Myerson-Satterthwaite Phase Transition (`M7`), Fisher Walras & clearance (`M8`), Bid-Ask Conversion/Reversal & Butterfly Arbitrage (`M9–M10`), 2-Period FTAP Super-Hedge (`M11`), SOS Nonnegativity (`M12`), Cantelli One-Sided Inequality & Copula-Free CVaR DRO (`M13–M14`), Constructive Covariance Obstruction (`M15`), Eisenberg-Noe Tarski Lattice Bracket, Fire-Sale Dominance & Bailout Sufficiency (`M16–M18`). |
-| **Ring-0 Upgrade (`../SNIPER` Absorbed)** | [`Econ.lean`](Econ.lean) (`128` lines, `0` local theorems, `import Flow`) | Replaces `SNIPER`'s naive 8-op mid-price residual with an 18-op Pure-GPR Bid-Ask + Tax/Fee Conversion & Reversal circuit (`econ_bidask_arb.fir`), `320B` `econ_taifex.flow`, `64B` `econ_ring0_abi.h`, zero `br/blr/div/FPU/SIMD`, and direct `sky130` GDSII synthesis via `../ELE/build/ele_bootstrap`. |
-| **Zero-FP-Trust Core** | [`include/econ_cert.h`](include/econ_cert.h), [`src/econ_cert.c`](src/econ_cert.c) | FIPS-180-4 SHA-256, Jacobi eigensolver, Two-Phase Simplex LP with dual multipliers, `__int128` Cholesky-SDD certifier, canonical `.econcert.json` writer/verifier, and 9 standalone `CertEcon*.lean` theorem emitters. |
-| **4 Pillar Engines** | [`src/econ_fin.c`](src/econ_fin.c), [`src/econ_actuary.c`](src/econ_actuary.c), [`src/econ_clearing.c`](src/econ_clearing.c), [`src/econ_mech.c`](src/econ_mech.c) | Arbitrage + 3-Tier MOT/SOS Pricing (`fin`), Copula-Free CVaR/Cantelli DRO (`actuary`), Tarski Clearing + Fire-Sale Bifurcation + `../FLOW/core/searu.h` Adversarial Shock Search (`clearing`), Combinatorial VCG + MS LP + Proportional-Response Fisher (`mech`). |
-| **Python SDK & Oracles** | [`oracles/`](oracles/), [`experiments/`](experiments/) | Pure-stdlib `EconEngine` & persistent `ctypes` `EconFastSession` (`libecon`), independent golden verifier ([`ECON_VERIFICATION_REPORT.md`](ECON_VERIFICATION_REPORT.md)), 14/14 tamper-rejection tests, and 4 scientific discovery experiments ([`experiments/ECON_DISCOVERY_REPORT.md`](experiments/ECON_DISCOVERY_REPORT.md)). |
+| **Formal Kernel (`M1–M30`)** | [`lean/EconCert.lean`](lean/EconCert.lean) (`import Flow.Interval` only) | Core Cholesky-SDD & LP Duality (`M1–M4`), VCG DSIC/IR & Discrete Myerson-Satterthwaite Phase Transition & Fisher Walras (`M5–M8`), Bid-Ask/Butterfly Arb & 2-Period MOT/SOS (`M9–M12`), Cantelli Ruin & Copula-Free CVaR DRO & Covariance Obstruction (`M13–M15`), Eisenberg-Noe Tarski Bracket & Fire-Sale Dominance & Bailout (`M16–M18`), Limited-Liability Convexity vs Clawback IC & Cantelli Amplification (`M19–M21`), Akerlof Death Spiral & Platform Take-Rate Margin & Screening Separation (`M22–M24`), Margin-Liquidation Paradox Witness & Supply-Chain Credit Horizon (`M25–M27`), 3D Weakest-Link Dominance & Minimal Institutional Repair (`M28–M30`). |
+| **Ring-0 Execution (`SNIPER` Absorbed)** | [`Econ.lean`](Econ.lean) (`128` lines, `0` local theorems, `import Flow`) | Replaces legacy mid-price parity with an **18-op Pure-GPR Bid-Ask + Fee Conversion/Reversal circuit** (`econ_bidask_arb.fir`, zero `br/blr/div/FPU/SIMD`), `320B` `econ_taifex.flow`, `64B` `econ_ring0_abi.h`, projecting to `124,242 B` `sky130` GDSII (`DRC=0, LVS=0`) via `../ELE/build/ele_bootstrap`. |
+| **Zero-FP-Trust Core** | [`include/econ_cert.h`](include/econ_cert.h), [`src/econ_cert.c`](src/econ_cert.c) | FIPS-180-4 SHA-256, Jacobi eigensolver, Two-Phase Simplex LP with duals, `__int128` Cholesky-SDD certifier, canonical `.econcert.json` verifier, and 14 standalone `CertEcon*.lean` theorem emitters. |
+| **8 Pillar Solvers** | [`src/econ_fin.c`](src/econ_fin.c), [`src/econ_actuary.c`](src/econ_actuary.c), [`src/econ_clearing.c`](src/econ_clearing.c), [`src/econ_mech.c`](src/econ_mech.c), [`src/econ_agency.c`](src/econ_agency.c), [`src/econ_adverse.c`](src/econ_adverse.c), [`src/econ_margin.c`](src/econ_margin.c), [`src/econ_inst.c`](src/econ_inst.c) | Arbitrage & 3-Tier MOT/SOS (`fin`), Copula-Free DRO & Cantelli (`actuary`), Tarski Clearing & `../FLOW/core/searu.h` Shock Search (`clearing`), VCG / MS / Fisher (`mech`), Clawback Phase Audit (`agency`), Take-Rate Cliff & Screening (`adverse`), Micro-Macro Margin Paradox & Supply-Chain Horizon (`margin`), Unified 3D DRC/LVS Auditor `audit-inst` (`inst`). |
+| **Python SDK, Oracles & Experiments** | [`oracles/`](oracles/), [`experiments/`](experiments/) | Pure-stdlib `EconEngine` & persistent `ctypes` `EconFastSession` (`build/libecon.{dylib,so}`), independent golden verifier ([`ECON_VERIFICATION_REPORT.md`](ECON_VERIFICATION_REPORT.md)), `22/22` tamper rejections, and `exp1–exp8` scientific discovery reports. |
 
 ---
 
-## 2. Quick Verification
+## 2. Quick Start & Verification
 
 ```bash
-make clean && make verify      # Hygiene + Ring-0 GPR/Silicon + LeanCert (M1-M18) + 9 CertEcon*.lean + Oracle + 14/14 Tamper
-make experiments               # Runs exp1..exp4 against econ_cli & EconFastSession -> experiments/*.json
+make clean && make verify      # Gate 1 Hygiene + Gate 2 Ring-0/sky130 + Gate 3 Lean (M1-M30), 24/24 selftest, 14 CertEcon*, Oracle, 22/22 Tamper
+make experiments               # Runs exp1..exp8 against econ_cli & EconFastSession -> experiments/*.json
 ```
 
-### CLI Examples
+### Commercial Institutional DRC & Pillar CLI Examples
 
 ```bash
 ./build/econ_cli selftest
-./build/econ_cli arb-scan benchmarks/fin/taifex_txo_arb_butterfly.csv --cert build/bfly.econcert.json --emit-lean build/CertBfly.lean --name CertBfly
-./build/econ_cli mot-bound benchmarks/fin/spx_2period_skew.csv --payoff fwd_start --param 1.0
+./build/econ_cli audit-inst benchmarks/inst/inst_exchange_margin_raw.json --cert build/exch_raw.econcert.json --emit-lean build/CertExchRaw.lean --name CertExchRaw
+./build/econ_cli audit-inst benchmarks/inst/inst_exchange_margin_repaired.json --cert build/exch_rep.econcert.json
+./build/econ_cli agency-audit benchmarks/agency/fund_2and20_raw.json --beta 0.35
+./build/econ_cli adverse-audit benchmarks/adverse/platform_marketplace.json --take-rate 0.25
+./build/econ_cli margin-audit benchmarks/margin/exchange_perp_8acct.json --theta 0.12
+./build/econ_cli supply-audit benchmarks/margin/supply_chain_tier3_10firm.json --tau 2.5 --searu
+./build/econ_cli arb-scan benchmarks/fin/taifex_txo_arb_butterfly.csv
+./build/econ_cli mot-bound benchmarks/fin/spx_2period_skew.csv --payoff var_swap
 ./build/econ_cli risk-dro benchmarks/actuary/danish_fire_heavy_tail.json
-./build/econ_cli ruin-bound benchmarks/actuary/copula_obstruction_2d.json --target-ruin 0.005
 ./build/econ_cli clear-net benchmarks/clearing/ecb_core_periphery_12.json --searu
-./build/econ_cli mech-verify benchmarks/mech/spectrum_comb_auction.json
-./build/econ_cli bilateral-ms --K 6 --second-best
-./build/econ_cli fisher-eq benchmarks/mech/fisher_4agent_3good.json
 ```
 
 ---
 
-## 3. Verified Highlights
+## 3. Verified Highlights & Scientific Discoveries
 
-- **Verification Summary**: See [`ECON_VERIFICATION_REPORT.md`](ECON_VERIFICATION_REPORT.md) (`FIN(5) + ACTUARY(3) + CLEARING(3) + MECH(4) + CERTS(18) + LEAN(9)` + `14/14` tamper rejections + `124,242 B` `sky130` GDSII `DRC=0, LVS=0`).
-- **Discovery Highlights**: See [`experiments/ECON_DISCOVERY_REPORT.md`](experiments/ECON_DISCOVERY_REPORT.md):
-  1. Legacy `SNIPER` fires 7/7 false positives under wide bid-ask noise (`>= 2.0` pts) while missing `taifex_txo_arb_butterfly.csv` (`+20.15` pts guaranteed profit across all $S \in \mathbb{Z}$).
-  2. 2-period MOT LP collapses Fréchet pricing width to **0.123x** on SPX Variance Swaps and exposes constant-IV Black-Scholes violations below the skew no-arbitrage floor (`4.386 < 5.082`).
-  3. Gaussian copula CVaR underestimates copula-free DRO tail risk up to **3.04x** at `d=10`, while Normal ruin probabilities fall $1.75 \times 10^6$× short of the exact Cantelli bound on heavy-tail fire losses.
-  4. Interbank fire-sale clearing exhibits a sharp discontinuous collapse cliff (`301.84 -> 24.50` paid obligations across `alpha_fire in (2.0, 2.5]` on `ecb12`), and discrete bilateral trade proves an exact phase transition from `K=4 (surplus = 0)` to `K >= 5 (strict impossibility -5, -14, -28, -48)`.
+- **Formal Verification ([`ECON_VERIFICATION_REPORT.md`](ECON_VERIFICATION_REPORT.md))**:
+  - `M1–M30` Lean 4 kernel (`leanchecker` PASS) + `14 / 14` standalone `CertEcon*.lean` modules (`0 sorryAx`, `0 ofReduceBool`).
+  - `24 / 24` C17 selftests, `32 / 32` canonical `.econcert.json` `__int128` certificates, independent pure-stdlib Python golden oracle (`FIN(5) + ACT(3) + CLR(3) + MECH(4) + AG(2) + ADV(2) + MGN(2) + INST(8)`), `22 / 22` tamper rejections, and `124,242 B` `sky130` GDSII (`DRC=0, LVS=0`).
+- **Classical Model-Free & Systemic Findings (`exp1–exp4`, [`experiments/ECON_DISCOVERY_REPORT.md`](experiments/ECON_DISCOVERY_REPORT.md))**:
+  1. Legacy mid-price parity fires `7/7` false positives under `>= 2.0` pt spreads while missing `taifex_txo_arb_butterfly.csv` (`+20.15` pts guaranteed profit across all $S \in \mathbb{Z}$).
+  2. 2-period MOT LP collapses SPX Variance Swap pricing ambiguity to **0.1234x** and catches constant-IV Black-Scholes breaching skew no-arbitrage floors.
+  3. Gaussian copula CVaR underestimates copula-free tail risk up to **3.04x** (`d=10`), while Normal approximations understate exact Cantelli fire ruin by $1.75 \times 10^6\times$.
+  4. Fire-sale clearing shows a sharp discontinuous cliff (`301.84 -> 24.50` across `alpha_fire in (2.0, 2.5]`), and discrete Myerson-Satterthwaite hits exact transition $K=4$ (`S=0`) to $K \ge 5$ (`S<0`).
+- **Institutional Engineering & Paradox Findings (`exp5–exp8`, [`experiments/ECON_INSTITUTIONAL_REPORT.md`](experiments/ECON_INSTITUTIONAL_REPORT.md))**:
+  5. **Limited-Liability Convexity**: Standard 2-and-20 (`beta=0`) induces tail-seeking (`IC = -1.48`), multiplying Cantelli ruin risk by **24.26x** (`1.48% -> 35.83%`); exact clawback threshold $\beta^*(0.20) = 0.1265$ restores `IC > 0`.
+  6. **Platform Death Spiral**: Take-rate revenue peaks at `30.00` (`r=15%`), vanishes across `r* = 25% -> 26%` via discontinuous unraveling (`k_eq = 1 -> 0`), and expands to `40%` under verifiable screening (`M24`).
+  7. **Inverted-U Margin Paradox & Supply-Chain Contagion**: Tightening maintenance margin beyond the interior optimal band (`theta in [0.08, 0.15]`, `0` bad debt) triggers a full 8-account cascade (`theta >= 0.18`, `34,000` bad debt, `P_eq: 100 -> 10`); stretching supply-chain payables ($\tau: 0.5 \to 2.5$) inflates core working capital (`+54.0`) while flipping `M27` horizon headroom negative (`-14.0`) and exploding SEARU shortfall to `272.84`.
+  8. **End-to-End 3D DRC Audits**: All 4 commercial institutions flip from `VETOED` (`M* = -34785, -4187, -19739, -17354` bps) to `CERTIFIED` (`M* = +7000, +2500, +600, +800` bps) via minimal institutional repair (`M30`).

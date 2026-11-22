@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic generator for all 14 ECON v1.0.0 benchmarks across 4 pillars (stdlib only)."""
+"""Deterministic generator for all 28 ECON v2.0.0 benchmarks across 8 pillars (stdlib only)."""
 
 from __future__ import annotations
 
@@ -264,13 +264,197 @@ def write_mech_benchmarks(mech_dir: str) -> None:
         }, f, indent=2)
 
 
+def write_agency_benchmarks(ag_dir: str) -> None:
+    os.makedirs(ag_dir, exist_ok=True)
+    base = {
+        "n_states": 4,
+        "alpha": 0.20,
+        "strike_K": 6.0,
+        "clawback_D": 0.0,
+        "c_safe": 0.10,
+        "c_risk": 0.0,
+        "u_reserve": 40.0,
+        "returns": [5.0, 10.0, 20.0, -60.0],
+        "p_safe": [0.545, 0.420, 0.030, 0.005],
+        "p_risk": [0.050, 0.150, 0.600, 0.200],
+    }
+    raw = dict(base, beta=0.0)
+    claw = dict(base, beta=0.35)
+    with open(os.path.join(ag_dir, "fund_2and20_raw.json"), "w") as f:
+        json.dump(raw, f, indent=2)
+    with open(os.path.join(ag_dir, "fund_2and20_clawback.json"), "w") as f:
+        json.dump(claw, f, indent=2)
+
+
+def write_adverse_benchmarks(adv_dir: str) -> None:
+    os.makedirs(adv_dir, exist_ok=True)
+    with open(os.path.join(adv_dir, "platform_marketplace.json"), "w") as f:
+        json.dump({
+            "n_types": 10,
+            "take_rate": 0.15,
+            "weights": [1.0] * 10,
+            "values": [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0],
+            "costs": [15.0, 19.0, 23.0, 28.0, 34.0, 41.0, 49.0, 55.0, 61.0, 66.0],
+            "has_screening": 1,
+            "qH": 0.10, "qL": 0.50,
+            "cH": 30.0, "cL": 15.0,
+            "PH": 85.0, "PL": 30.0,
+            "BH": 120.0, "BL": 0.0,
+        }, f, indent=2)
+
+    with open(os.path.join(adv_dir, "insurance_death_spiral.json"), "w") as f:
+        json.dump({
+            "n_types": 8,
+            "take_rate": 0.42,
+            "weights": [1.0] * 8,
+            "values": [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0],
+            "costs": [15.0, 19.0, 24.0, 30.0, 37.0, 45.0, 54.0, 64.0],
+            "has_screening": 0,
+        }, f, indent=2)
+
+
+def write_margin_benchmarks(mgn_dir: str) -> None:
+    os.makedirs(mgn_dir, exist_ok=True)
+    with open(os.path.join(mgn_dir, "exchange_perp_8acct.json"), "w") as f:
+        json.dump({
+            "n_accts": 8,
+            "P0": 100.0,
+            "Pmin": 10.0,
+            "alpha_impact": 0.15,
+            "theta_mm": 0.30,
+            "shock_pct": 0.0,
+            "equity_target": 0.10,
+            "h": [80.0] * 8,
+            "d": [6800.0, 6300.0, 5800.0, 5300.0, 4800.0, 4300.0, 3800.0, 3300.0],
+            "c": [0.0] * 8,
+        }, f, indent=2)
+
+    N = 10
+    L = [[0.0] * N for _ in range(N)]
+    # Core 0 owes Tier-1 (1,2,3) 12 each; Tier-1 owe Tier-2 (4,5,6); Tier-2 owe Tier-3 (7,8,9); Tier-3 owe core & cash loop
+    for j in (1, 2, 3):
+        L[0][j] = 12.0
+    L[1][4] = 10.0; L[1][5] = 2.0
+    L[2][5] = 10.0; L[2][6] = 2.0
+    L[3][6] = 10.0; L[3][4] = 2.0
+    L[4][7] = 11.0
+    L[5][8] = 11.0
+    L[6][9] = 11.0
+    for i in (7, 8, 9):
+        L[i][0] = 8.0
+    with open(os.path.join(mgn_dir, "supply_chain_tier3_10firm.json"), "w") as f:
+        json.dump({
+            "n_firms": N,
+            "core_idx": 0,
+            "tau_horizon": 2.0,
+            "alpha_fire": 1.5,
+            "beta_default": 0.85,
+            "shock_budget": 18.0,
+            "ext_assets": [16.0, 3.0, 3.0, 3.0, 2.5, 2.5, 2.5, 4.0, 4.0, 4.0],
+            "base_payables": L,
+        }, f, indent=2)
+
+
+def write_inst_benchmarks(inst_dir: str) -> None:
+    os.makedirs(inst_dir, exist_ok=True)
+    specs = {
+        "inst_fund_kpi_raw.json": {
+            "institution_name": "AlphaCap_2and20_Raw",
+            "institution_type": "fund_agency",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.5, "c_sys": 1.2,
+            "inc_ref_path": "benchmarks/agency/fund_2and20_raw.json",
+            "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+            "sys_ref_path": "benchmarks/clearing/ring_network_6.json",
+            "beta_override": 0.0, "dro_reserve_mult": 1.0, "bailout_buffer": 0.0, "chain_fee_bps": 4000.0,
+        },
+        "inst_fund_kpi_repaired.json": {
+            "institution_name": "AlphaCap_2and20_Clawback",
+            "institution_type": "fund_agency",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.5, "c_sys": 1.2,
+            "inc_ref_path": "benchmarks/agency/fund_2and20_clawback.json",
+            "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+            "sys_ref_path": "benchmarks/clearing/ring_network_6.json",
+            "beta_override": 0.35, "dro_reserve_mult": 1.5, "bailout_buffer": 6.0, "chain_fee_bps": 7000.0,
+        },
+        "inst_platform_raw.json": {
+            "institution_name": "BazaarX_HighTake_Raw",
+            "institution_type": "platform_adverse",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.2, "c_dro": 1.0, "c_sys": 1.0,
+            "inc_ref_path": "benchmarks/adverse/insurance_death_spiral.json",
+            "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+            "sys_ref_path": "",
+            "take_override": 0.42, "dro_reserve_mult": 1.0, "bailout_buffer": 0.0, "chain_fee_bps": 500.0,
+        },
+        "inst_platform_repaired.json": {
+            "institution_name": "BazaarX_Screened_Repaired",
+            "institution_type": "platform_adverse",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.2, "c_dro": 1.0, "c_sys": 1.0,
+            "inc_ref_path": "benchmarks/adverse/platform_marketplace.json",
+            "dro_ref_path": "benchmarks/actuary/danish_fire_heavy_tail.json",
+            "sys_ref_path": "",
+            "take_override": 0.15, "dro_reserve_mult": 3.2, "bailout_buffer": 0.0, "chain_fee_bps": 500.0,
+        },
+        "inst_exchange_margin_raw.json": {
+            "institution_name": "PerpDEX_TightMM_Raw",
+            "institution_type": "exchange_margin",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.2, "c_sys": 2.0,
+            "inc_ref_path": "",
+            "dro_ref_path": "benchmarks/actuary/copula_obstruction_2d.json",
+            "sys_ref_path": "benchmarks/margin/exchange_perp_8acct.json",
+            "theta_override": 0.30, "dro_reserve_mult": 1.0, "bailout_buffer": 0.0, "chain_fee_bps": 600.0,
+        },
+        "inst_exchange_margin_repaired.json": {
+            "institution_name": "PerpDEX_OptBand_Repaired",
+            "institution_type": "exchange_margin",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.2, "c_sys": 2.0,
+            "inc_ref_path": "",
+            "dro_ref_path": "benchmarks/actuary/copula_obstruction_2d.json",
+            "sys_ref_path": "benchmarks/margin/exchange_perp_8acct.json",
+            "theta_override": 0.12, "dro_reserve_mult": 3.5, "bailout_buffer": 0.0, "chain_fee_bps": 600.0,
+        },
+        "inst_supply_chain_raw.json": {
+            "institution_name": "MegaOEM_LongTerms_Raw",
+            "institution_type": "supply_chain",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.0, "c_sys": 1.8,
+            "inc_ref_path": "",
+            "dro_ref_path": "benchmarks/actuary/credit_portfolio_5d.json",
+            "sys_ref_path": "benchmarks/margin/supply_chain_tier3_10firm.json",
+            "tau_override": 2.5, "dro_reserve_mult": 1.0, "bailout_buffer": 0.0, "chain_fee_bps": 500.0,
+        },
+        "inst_supply_chain_repaired.json": {
+            "institution_name": "MegaOEM_ShortHorizon_Repaired",
+            "institution_type": "supply_chain",
+            "target_margin_bps": 500.0,
+            "c_inc": 1.0, "c_dro": 1.0, "c_sys": 1.8,
+            "inc_ref_path": "",
+            "dro_ref_path": "benchmarks/actuary/credit_portfolio_5d.json",
+            "sys_ref_path": "benchmarks/margin/supply_chain_tier3_10firm.json",
+            "tau_override": 0.8, "dro_reserve_mult": 3.5, "bailout_buffer": 6.0, "chain_fee_bps": 800.0,
+        },
+    }
+    for fname, obj in specs.items():
+        with open(os.path.join(inst_dir, fname), "w") as f:
+            json.dump(obj, f, indent=2)
+
+
 def main() -> None:
     base = "benchmarks"
     write_fin_benchmarks(os.path.join(base, "fin"))
     write_actuary_benchmarks(os.path.join(base, "actuary"))
     write_clearing_benchmarks(os.path.join(base, "clearing"))
     write_mech_benchmarks(os.path.join(base, "mech"))
-    print("  [GEN] Generated 14 deterministic ECON v1.0.0 benchmarks under benchmarks/{fin,actuary,clearing,mech}/")
+    write_agency_benchmarks(os.path.join(base, "agency"))
+    write_adverse_benchmarks(os.path.join(base, "adverse"))
+    write_margin_benchmarks(os.path.join(base, "margin"))
+    write_inst_benchmarks(os.path.join(base, "inst"))
+    print("  [GEN] Generated 28 deterministic ECON v2.0.0 benchmarks across 8 pillars under benchmarks/")
 
 
 if __name__ == "__main__":

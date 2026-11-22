@@ -28,12 +28,14 @@ FLOW_INC_FLAGS := -I"$(FLOW_DIR)/core" -I"$(FLOW_DIR)/sdk"
 
 ECON_CFLAGS  := -std=c17 -O3 -Wall -Wextra -Werror -Wpedantic -Wconversion -Iinclude $(FLOW_INC_FLAGS)
 ECON_LDFLAGS := -lm -pthread
-ECON_HDRS    := include/econ_cert.h include/econ_fin.h include/econ_actuary.h include/econ_clearing.h include/econ_mech.h
-ECON_SRCS    := src/econ_cert.c src/econ_fin.c src/econ_actuary.c src/econ_clearing.c src/econ_mech.c
+ECON_HDRS    := include/econ_cert.h include/econ_fin.h include/econ_actuary.h include/econ_clearing.h include/econ_mech.h include/econ_agency.h include/econ_adverse.h include/econ_margin.h include/econ_inst.h
+ECON_SRCS    := src/econ_cert.c src/econ_fin.c src/econ_actuary.c src/econ_clearing.c src/econ_mech.c src/econ_agency.c src/econ_adverse.c src/econ_margin.c src/econ_inst.c
 
-CFLAGS_GPR := -std=c17 -mgeneral-regs-only -fno-jump-tables -mstack-probe-size=65536 \
-              -fsanitize=signed-integer-overflow,shift-exponent,bounds,null,return,unreachable \
-              -fsanitize-trap=all -O2 -Wall -Wextra -Wpedantic -Werror
+NOGPR_FLAG   := $(shell $(CC) -mgeneral-regs-only -x c -c /dev/null -o /dev/null 2>/dev/null && echo -mgeneral-regs-only)
+NOJT_FLAG    := $(shell $(CC) -fno-jump-tables -x c -c /dev/null -o /dev/null 2>/dev/null && echo -fno-jump-tables)
+NOCHK_FLAG   := $(shell $(CC) -mstack-probe-size=65536 -x c -c /dev/null -o /dev/null 2>/dev/null && echo -mstack-probe-size=65536)
+UBTRAP_FLAGS := $(shell $(CC) -fsanitize=signed-integer-overflow,shift-exponent,bounds,null,return,unreachable -fsanitize-trap=all -x c -c /dev/null -o /dev/null 2>/dev/null && echo "-fsanitize=signed-integer-overflow,shift-exponent,bounds,null,return,unreachable -fsanitize-trap=all")
+CFLAGS_GPR   := -std=c17 $(NOGPR_FLAG) $(NOJT_FLAG) $(NOCHK_FLAG) $(UBTRAP_FLAGS) -O2 -Wall -Wextra -Wpedantic -Werror
 
 BUILD_DIR     := build
 ECON_OLEAN    := $(BUILD_DIR)/Econ.olean
@@ -48,7 +50,7 @@ ECONCERT_OLN  := $(BUILD_DIR)/EconCert.olean
 ECON_LIB      := $(BUILD_DIR)/libecon.$(SHLIB_EXT)
 ECON_CLI      := $(BUILD_DIR)/econ_cli
 CERT_DIR      := $(BUILD_DIR)/certs
-CERT_MODS     := CertEconArbBidAsk CertEconSniperUpgrade CertEconMotSos CertEconRiskDro CertEconCopulaObs CertEconClearing CertEconMechVcg CertEconMsDeficit CertEconFisherEq
+CERT_MODS     := CertEconArbBidAsk CertEconSniperUpgrade CertEconMotSos CertEconRiskDro CertEconCopulaObs CertEconClearing CertEconMechVcg CertEconMsDeficit CertEconFisherEq CertEconAgency CertEconAdverse CertEconMargin CertEconInstRaw CertEconInstRepaired
 
 .DEFAULT_GOAL := all
 .PHONY: all hygiene-gate flow-dep ring0-gate econ-build econ-benchmarks econ-gate test verify experiments clean
@@ -65,7 +67,7 @@ hygiene-gate: | $(BUILD_DIR)
 	if [ "$$econ_lines" -gt 150 ]; then echo "ERROR: Econ.lean exceeds 150 lines ($$econ_lines)" >&2; exit 1; fi
 	@! grep -Eq '^[[:space:]]*axiom[[:space:]]|\bsorry\b|native_decide' lean/EconCert.lean || \
 		(echo "ERROR: lean/EconCert.lean contains sorry, axiom, or native_decide!" >&2 && exit 1)
-	@printf '#include "econ_cert.h"\n#include "econ_fin.h"\n#include "econ_actuary.h"\n#include "econ_clearing.h"\n#include "econ_mech.h"\nint econ_cpp20_probe(void){ return (int)sizeof(econ_cert_record_t); }\n' | \
+	@printf '#include "econ_cert.h"\n#include "econ_fin.h"\n#include "econ_actuary.h"\n#include "econ_clearing.h"\n#include "econ_mech.h"\n#include "econ_agency.h"\n#include "econ_adverse.h"\n#include "econ_margin.h"\n#include "econ_inst.h"\nint econ_cpp20_probe(void){ return (int)sizeof(econ_cert_record_t); }\n' | \
 		$(CXX) -x c++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -Iinclude $(FLOW_INC_FLAGS) -c - -o $(BUILD_DIR)/.cpp_probe.o
 	@rm -f $(BUILD_DIR)/.cpp_probe.o
 	@echo "  [PASS] Hygiene + Thin Econ.lean (<=150 lines, 0 theorems) + C++20 Header Cleanliness"
@@ -117,7 +119,7 @@ ring0-gate: hygiene-gate flow-dep $(ECON_FLOW) $(ECON_ABI_H) $(ECON_FIR)
 		'  /* Case C: Genuine Reversal Arbitrage (22500 + 510 - 500 = 22510 > fut_ask=22502 + 2 -> edge=+6) */' \
 		'  uint64_t in_rev[8] = {(uint64_t)(22500*Q), (uint64_t)(510*Q), (uint64_t)(512*Q), (uint64_t)(498*Q), (uint64_t)(500*Q), (uint64_t)(22500*Q), (uint64_t)(22502*Q), (uint64_t)(2*Q)};' \
 		'  if (!flow_ir_eval_u64(&g_prog, in_rev, out) || (int64_t)out[1] != 6 * Q) return 8;' \
-		'  printf("  [ECON-GPR] WireFrame64 64B + econ_bidask_arb.fir 0-ULP Conversion/Reversal/FP PASS\\n");' \
+		'  printf("  [ECON-GPR] WireFrame64 64B + econ_bidask_arb.fir 0-ULP Conversion/Reversal/FP PASS\n");' \
 		'  return 0;' \
 		'}' > $(RING0_GATE_C)
 	@$(CC) $(CFLAGS_GPR) $(FLOW_INC_FLAGS) -I$(BUILD_DIR) -c $(RING0_GATE_C) -o $(RING0_GATE_O)
@@ -146,7 +148,7 @@ econ-benchmarks:
 	python3 oracles/gen_benchmarks.py
 
 econ-gate: econ-build econ-benchmarks
-	@echo "=== [Gate 3] ECON v1.0.0 4-Pillar Engine, Zero-FP-Trust __int128 Certs & Lean 4 Audits ==="
+	@echo "=== [Gate 3] ECON v2.0.0 8-Pillar Engine, Zero-FP-Trust __int128 Certs & Lean 4 Audits ==="
 	LEAN_PATH="$(FLOW_OLEAN_DIR):$(BUILD_DIR)" leanchecker EconCert
 	./$(ECON_CLI) selftest
 	@mkdir -p $(CERT_DIR)
@@ -160,6 +162,11 @@ econ-gate: econ-build econ-benchmarks
 	./$(ECON_CLI) mech-verify benchmarks/mech/spectrum_comb_auction.json --emit-lean $(CERT_DIR)/CertEconMechVcg.lean --name CertEconMechVcg
 	./$(ECON_CLI) bilateral-ms --K 6 --second-best --emit-lean $(CERT_DIR)/CertEconMsDeficit.lean --name CertEconMsDeficit
 	./$(ECON_CLI) fisher-eq benchmarks/mech/fisher_4agent_3good.json --emit-lean $(CERT_DIR)/CertEconFisherEq.lean --name CertEconFisherEq
+	./$(ECON_CLI) agency-audit benchmarks/agency/fund_2and20_clawback.json --emit-lean $(CERT_DIR)/CertEconAgency.lean --name CertEconAgency
+	./$(ECON_CLI) adverse-audit benchmarks/adverse/platform_marketplace.json --emit-lean $(CERT_DIR)/CertEconAdverse.lean --name CertEconAdverse
+	./$(ECON_CLI) margin-audit benchmarks/margin/exchange_perp_8acct.json --emit-lean $(CERT_DIR)/CertEconMargin.lean --name CertEconMargin
+	./$(ECON_CLI) audit-inst benchmarks/inst/inst_fund_kpi_raw.json --emit-lean $(CERT_DIR)/CertEconInstRaw.lean --name CertEconInstRaw
+	./$(ECON_CLI) audit-inst benchmarks/inst/inst_fund_kpi_repaired.json --emit-lean $(CERT_DIR)/CertEconInstRepaired.lean --name CertEconInstRepaired
 	@for c in $(CERT_DIR)/*.econcert.json; do ./$(ECON_CLI) cert-verify "$$c" || exit 1; done
 	@for m in $(CERT_MODS); do \
 		LEAN_PATH="$(FLOW_OLEAN_DIR):$(BUILD_DIR)" $(LEAN) -DwarningAsError=true -o $(BUILD_DIR)/$$m.olean $(CERT_DIR)/$$m.lean > $(CERT_DIR)/$$m.axioms.txt || exit 1; \
@@ -172,7 +179,7 @@ all: hygiene-gate ring0-gate econ-build
 
 test: ring0-gate econ-gate
 	@echo "================================================================================"
-	@echo "   ALL ECON v1.0.0 RING-0, LEAN 4 (18 THMS), MOT/DRO/CLEARING/MECH GATES PASS"
+	@echo "   ALL ECON v2.0.0 RING-0, LEAN 4 (30 THMS), 8-PILLAR & INSTITUTIONAL DRC GATES PASS"
 	@echo "================================================================================"
 
 verify: test
@@ -182,6 +189,10 @@ experiments: econ-build econ-benchmarks
 	python3 experiments/exp2_mot_sos_hierarchy.py
 	python3 experiments/exp3_copula_model_risk.py
 	python3 experiments/exp4_firesale_tipping_and_ms.py
+	python3 experiments/exp5_agency_clawback_phase.py
+	python3 experiments/exp6_platform_death_spiral.py
+	python3 experiments/exp7_margin_paradox_and_supplychain.py
+	python3 experiments/exp8_institution_drc_audit.py
 
 clean:
 	rm -rf $(BUILD_DIR)
