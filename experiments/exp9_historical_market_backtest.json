@@ -1,0 +1,204 @@
+{
+  "episode1_taifex": {
+    "stress_20180206": {
+      "n_strikes": 9,
+      "arb_found": 1,
+      "best_mode": 3,
+      "best_edge": 92.04,
+      "best_k1": 10200.0,
+      "best_k2": 10400.0,
+      "best_k3": 10600.0,
+      "sniper_flags": 0,
+      "sniper_false_pos": 0,
+      "sniper_false_neg": 1,
+      "econ_conv_count": 0,
+      "econ_rev_count": 0,
+      "econ_vertical_count": 0,
+      "econ_butterfly_count": 11
+    },
+    "normal_2024": {
+      "n_strikes": 7,
+      "arb_found": 0,
+      "best_mode": 0,
+      "best_edge": 0.0,
+      "best_k1": 0.0,
+      "best_k2": 0.0,
+      "best_k3": 0.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "sniper_false_neg": 0,
+      "econ_conv_count": 0,
+      "econ_rev_count": 0,
+      "econ_vertical_count": 0,
+      "econ_butterfly_count": 0
+    }
+  },
+  "episode2_perp_20210519": {
+    "sweep": [
+      {
+        "theta_mm": 0.06,
+        "P_eq": 39.56,
+        "bad_debt": 0.0,
+        "liquidated_count": 0,
+        "liquidated_units": 0.0,
+        "macro_safety_margin": 0.1642641509433963,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.08,
+        "P_eq": 39.56,
+        "bad_debt": 0.0,
+        "liquidated_count": 0,
+        "liquidated_units": 0.0,
+        "macro_safety_margin": 0.1942641509433963,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.12,
+        "P_eq": 39.56,
+        "bad_debt": 0.0,
+        "liquidated_count": 0,
+        "liquidated_units": 0.0,
+        "macro_safety_margin": 0.1942641509433963,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.16,
+        "P_eq": 39.56,
+        "bad_debt": 0.0,
+        "liquidated_count": 0,
+        "liquidated_units": 0.0,
+        "macro_safety_margin": 0.1942641509433963,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.2,
+        "P_eq": 18.0,
+        "bad_debt": 4270.0,
+        "liquidated_count": 8,
+        "liquidated_units": 640.0,
+        "macro_safety_margin": -0.9803217223028544,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.25,
+        "P_eq": 18.0,
+        "bad_debt": 4270.0,
+        "liquidated_count": 8,
+        "liquidated_units": 640.0,
+        "macro_safety_margin": -0.9803217223028544,
+        "theta_opt": 0.08
+      },
+      {
+        "theta_mm": 0.3,
+        "P_eq": 18.0,
+        "bad_debt": 4270.0,
+        "liquidated_count": 8,
+        "liquidated_units": 640.0,
+        "macro_safety_margin": -0.9803217223028544,
+        "theta_opt": 0.08
+      }
+    ],
+    "safe_012": {
+      "n_accts": 8,
+      "theta_mm": 0.12,
+      "alpha_impact": 0.045,
+      "P_start": 39.56,
+      "P_eq": 39.56,
+      "total_debt": 15600.0,
+      "liquidated_units": 0.0,
+      "liquidated_count": 0,
+      "bad_debt": 0.0,
+      "macro_safety_margin": 0.19426415,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.19426415,
+      "paradox_detected": 0
+    },
+    "tight_025": {
+      "n_accts": 8,
+      "theta_mm": 0.25,
+      "alpha_impact": 0.045,
+      "P_start": 39.56,
+      "P_eq": 18.0,
+      "total_debt": 15600.0,
+      "liquidated_units": 640.0,
+      "liquidated_count": 8,
+      "bad_debt": 4270.0,
+      "macro_safety_margin": -0.98032172,
+      "theta_opt": 0.08,
+      "opt_safety_margin": 0.19426415,
+      "paradox_detected": 1
+    }
+  },
+  "episode3_danish_fire_1980_1990": {
+    "dro": {
+      "n_assets": 3,
+      "alpha": 0.99,
+      "gauss_var": 27.555878,
+      "gauss_cvar": 33.16132952,
+      "ra_var_ub": 47.482116,
+      "comonotonic_cvar_ub": 47.482116,
+      "moment_dro_cvar_ub": 65.50473253,
+      "amp_copula_vs_gauss": 1.431852,
+      "amp_moment_vs_gauss": 1.97533493,
+      "corr_psd_ok": 1
+    },
+    "ruin": {
+      "mu_loss": 4.61105892,
+      "sigma_loss": 7.84407745,
+      "threshold_u": 45.0,
+      "gauss_ruin_prob": 1.3095845974e-07,
+      "cantelli_ruin_ub": 0.036347880646,
+      "ruin_ratio": 277552.75006545,
+      "min_capital_gauss": 22.85911182,
+      "min_capital_cantelli": 82.65864412
+    }
+  },
+  "episode4_bank_duration_2023": {
+    "raw": {
+      "institution_name": "RegionalBank_2023_HTM_Raw",
+      "institution_type": "fund_agency",
+      "m_inc_bps": -6325.0,
+      "m_dro_bps": -44597.4427,
+      "m_sys_bps": -6210.5054,
+      "master_margin_bps": -44597.0,
+      "target_margin_bps": 500.0,
+      "d_inc_bps": 6825.0,
+      "d_dro_bps": 45097.0,
+      "d_sys_bps": 6711.0,
+      "min_repair_cost": 82523.7,
+      "certified": 0,
+      "verdict": "VETOED",
+      "weakest_dim": "DRO",
+      "exploit_note": "Limited-liability call convexity lures risky strategy (m_inc=-6325bps)"
+    },
+    "repaired": {
+      "institution_name": "RegionalBank_2023_ClawbackHedged_Repaired",
+      "institution_type": "fund_agency",
+      "m_inc_bps": 19268.75,
+      "m_dro_bps": 8880.0666,
+      "m_sys_bps": 7000.0,
+      "master_margin_bps": 7000.0,
+      "target_margin_bps": 500.0,
+      "d_inc_bps": 0.0,
+      "d_dro_bps": 0.0,
+      "d_sys_bps": 0.0,
+      "min_repair_cost": 0.0,
+      "certified": 1,
+      "verdict": "CERTIFIED",
+      "weakest_dim": "SYS",
+      "exploit_note": "All 3 institutional safety margins strictly positive"
+    },
+    "lean_raw_theorems": [
+      "inst_weakest_exploit_veto",
+      "inst_repair_check",
+      "inst_minimal_repair_sound"
+    ],
+    "lean_rep_theorems": [
+      "inst_safety_check",
+      "inst_3d_certified"
+    ]
+  },
+  "certs_verified": 8,
+  "certs_total": 8
+}

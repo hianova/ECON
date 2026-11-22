@@ -193,6 +193,7 @@ experiments: econ-build econ-benchmarks
 	python3 experiments/exp6_platform_death_spiral.py
 	python3 experiments/exp7_margin_paradox_and_supplychain.py
 	python3 experiments/exp8_institution_drc_audit.py
+	python3 experiments/exp9_historical_market_backtest.py
 
 clean:
 	rm -rf $(BUILD_DIR)

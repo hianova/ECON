@@ -1,0 +1,29 @@
+{
+  "episode": "2023 Regional Bank HTM Duration Mismatch (Fed Hike States: +0/+100/+250/+450 bps)",
+  "n_states": 4,
+  "alpha": 0.2,
+  "strike_K": 5.0,
+  "clawback_D": 0.0,
+  "c_safe": 0.15,
+  "c_risk": 0.0,
+  "u_reserve": 35.0,
+  "returns": [
+    4.0,
+    8.0,
+    16.0,
+    -65.0
+  ],
+  "p_safe": [
+    0.55,
+    0.4,
+    0.045,
+    0.005
+  ],
+  "p_risk": [
+    0.05,
+    0.15,
+    0.62,
+    0.18
+  ],
+  "beta": 0.0
+}

@@ -1,0 +1,15 @@
+{
+  "institution_name": "RegionalBank_2023_ClawbackHedged_Repaired",
+  "institution_type": "fund_agency",
+  "target_margin_bps": 500.0,
+  "c_inc": 1.0,
+  "c_dro": 1.5,
+  "c_sys": 1.2,
+  "inc_ref_path": "data/historical/agency_2023_bank_htm.json",
+  "dro_ref_path": "data/historical/danish_fire_empirical_1980_1990.json",
+  "sys_ref_path": "data/historical/clearing_2023_regional_run.json",
+  "beta_override": 0.45,
+  "dro_reserve_mult": 2.2,
+  "bailout_buffer": 8.0,
+  "chain_fee_bps": 7000.0
+}
