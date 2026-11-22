@@ -1,0 +1,86 @@
+{
+  "spread_sweep": [
+    {
+      "half_spread": 1.0,
+      "sniper_flags": 0,
+      "sniper_false_pos": 0,
+      "econ_arb_found": 0,
+      "econ_false_pos": 0
+    },
+    {
+      "half_spread": 2.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "econ_arb_found": 0,
+      "econ_false_pos": 0
+    },
+    {
+      "half_spread": 3.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "econ_arb_found": 0,
+      "econ_false_pos": 0
+    },
+    {
+      "half_spread": 4.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "econ_arb_found": 0,
+      "econ_false_pos": 0
+    },
+    {
+      "half_spread": 5.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "econ_arb_found": 0,
+      "econ_false_pos": 0
+    }
+  ],
+  "benchmark_scenarios": [
+    {
+      "name": "taifex_txo_clean.csv",
+      "n_strikes": 7,
+      "arb_found": 0,
+      "best_mode": 0,
+      "best_edge": 0.0,
+      "sniper_flags": 7,
+      "sniper_false_pos": 7,
+      "sniper_false_neg": 0,
+      "butterfly_count": 0
+    },
+    {
+      "name": "taifex_txo_arb_conv.csv",
+      "n_strikes": 7,
+      "arb_found": 1,
+      "best_mode": 1,
+      "best_edge": 11.0494448,
+      "sniper_flags": 1,
+      "sniper_false_pos": 0,
+      "sniper_false_neg": 0,
+      "butterfly_count": 0
+    },
+    {
+      "name": "taifex_txo_arb_butterfly.csv",
+      "n_strikes": 7,
+      "arb_found": 1,
+      "best_mode": 3,
+      "best_edge": 20.15,
+      "sniper_flags": 0,
+      "sniper_false_pos": 0,
+      "sniper_false_neg": 1,
+      "butterfly_count": 5
+    },
+    {
+      "name": "synthetic_reversal.csv",
+      "n_strikes": 7,
+      "arb_found": 1,
+      "best_mode": 2,
+      "best_edge": 12.0494448,
+      "sniper_flags": 1,
+      "sniper_false_pos": 0,
+      "sniper_false_neg": 0,
+      "butterfly_count": 0
+    }
+  ],
+  "certs_verified": "9/9"
+}

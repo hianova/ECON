@@ -1,0 +1,680 @@
+{
+  "phase_ecb": [
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 0.0,
+      "paid_upper": 308.3,
+      "paid_lower": 248.87405405076416,
+      "multi_eq_gap": 59.42594594923585,
+      "defaults_lower": 11,
+      "systemic_shortfall": 88.12594594923584,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 0.5,
+      "paid_upper": 306.79688739534464,
+      "paid_lower": 204.4387879661252,
+      "multi_eq_gap": 102.35809942921944,
+      "defaults_lower": 11,
+      "systemic_shortfall": 132.5612120338748,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 1.0,
+      "paid_upper": 305.2125609800409,
+      "paid_lower": 137.81064987170066,
+      "multi_eq_gap": 167.40191110834024,
+      "defaults_lower": 11,
+      "systemic_shortfall": 199.18935012829934,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 1.5,
+      "paid_upper": 303.5559336735447,
+      "paid_lower": 78.89424555356447,
+      "multi_eq_gap": 224.66168811998023,
+      "defaults_lower": 11,
+      "systemic_shortfall": 258.1057544464355,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 2.0,
+      "paid_upper": 301.8402277927605,
+      "paid_lower": 43.63787394459004,
+      "multi_eq_gap": 258.20235384817045,
+      "defaults_lower": 11,
+      "systemic_shortfall": 293.36212605540993,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 2.5,
+      "paid_upper": 24.500736166145238,
+      "paid_lower": 24.5007361529944,
+      "multi_eq_gap": 1.3150838640285656e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 312.4992638470056,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 3.0,
+      "paid_upper": 14.040348615625666,
+      "paid_lower": 14.040348603776378,
+      "multi_eq_gap": 1.1849287773202377e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 322.95965139622365,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 3.5,
+      "paid_upper": 8.181880213179532,
+      "paid_lower": 8.181880203865052,
+      "multi_eq_gap": 9.314479854083402e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 328.81811979613497,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 4.0,
+      "paid_upper": 4.827079746001489,
+      "paid_lower": 4.827079737223039,
+      "multi_eq_gap": 8.778449966939661e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 332.172920262777,
+      "min_bailout": 28.7
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 0.0,
+      "paid_upper": 303.15500000000003,
+      "paid_lower": 211.54294594118178,
+      "multi_eq_gap": 91.61205405881825,
+      "defaults_lower": 11,
+      "systemic_shortfall": 125.45705405881822,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 0.5,
+      "paid_upper": 301.66593854555464,
+      "paid_lower": 163.5424557997657,
+      "multi_eq_gap": 138.12348274578895,
+      "defaults_lower": 11,
+      "systemic_shortfall": 173.4575442002343,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 1.0,
+      "paid_upper": 106.86007098635737,
+      "paid_lower": 106.86007096955218,
+      "multi_eq_gap": 1.680518835200928e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 230.13992903044783,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 1.5,
+      "paid_upper": 62.279859342618884,
+      "paid_lower": 62.27985932787436,
+      "multi_eq_gap": 1.4744522047749342e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 274.72014067212564,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 2.0,
+      "paid_upper": 35.301813818392525,
+      "paid_lower": 35.301813807609506,
+      "multi_eq_gap": 1.078301892221134e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 301.6981861923905,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 2.5,
+      "paid_upper": 20.166697685591867,
+      "paid_lower": 20.166697674294078,
+      "multi_eq_gap": 1.1297789370701139e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 316.8333023257059,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 3.0,
+      "paid_upper": 11.68686297452237,
+      "paid_lower": 11.6868629647951,
+      "multi_eq_gap": 9.727269656423232e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 325.3131370352049,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 3.5,
+      "paid_upper": 6.859755383936761,
+      "paid_lower": 6.859755376355512,
+      "multi_eq_gap": 7.58124940603011e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 330.1402446236445,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 4.0,
+      "paid_upper": 4.0661257980612,
+      "paid_lower": 4.066125788642604,
+      "multi_eq_gap": 9.41859568115433e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 332.9338742113574,
+      "min_bailout": 33.845
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 0.0,
+      "paid_upper": 174.21183784193622,
+      "paid_lower": 174.21183783391442,
+      "multi_eq_gap": 8.021800113056088e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 162.78816216608558,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 0.5,
+      "paid_upper": 127.70852854295683,
+      "paid_lower": 127.70852853133995,
+      "multi_eq_gap": 1.1616876349762606e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 209.29147146866006,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 1.0,
+      "paid_upper": 81.66240040098876,
+      "paid_lower": 81.66240038851014,
+      "multi_eq_gap": 1.2478622579692455e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 255.33759961148985,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 1.5,
+      "paid_upper": 48.1664514747403,
+      "paid_lower": 48.1664514625681,
+      "multi_eq_gap": 1.2172201024895912e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 288.8335485374319,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 2.0,
+      "paid_upper": 27.80736421546064,
+      "paid_lower": 27.807364205487566,
+      "multi_eq_gap": 9.973074810432081e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 309.19263579451246,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 2.5,
+      "paid_upper": 16.116262609712162,
+      "paid_lower": 16.116262597876254,
+      "multi_eq_gap": 1.1835908253488014e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 320.88373740212376,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 3.0,
+      "paid_upper": 9.433320595761945,
+      "paid_lower": 9.43332058675142,
+      "multi_eq_gap": 9.010525658936785e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 327.5666794132486,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 3.5,
+      "paid_upper": 5.574291673979937,
+      "paid_lower": 5.574291663914531,
+      "multi_eq_gap": 1.0065406286230427e-08,
+      "defaults_lower": 11,
+      "systemic_shortfall": 331.42570833608545,
+      "min_bailout": 39.489999999999995
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 4.0,
+      "paid_upper": 3.3190108651748074,
+      "paid_lower": 3.3190108559896263,
+      "multi_eq_gap": 9.185181060189507e-09,
+      "defaults_lower": 11,
+      "systemic_shortfall": 333.68098914401037,
+      "min_bailout": 39.489999999999995
+    }
+  ],
+  "phase_stress": [
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 0.0,
+      "paid_upper": 533.7240566044617,
+      "paid_lower": 483.0814245703153,
+      "multi_eq_gap": 50.6426320341464,
+      "defaults_lower": 23,
+      "systemic_shortfall": 173.91857542968472,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 0.5,
+      "paid_upper": 520.9170483300301,
+      "paid_lower": 396.0798611372484,
+      "multi_eq_gap": 124.8371871927817,
+      "defaults_lower": 23,
+      "systemic_shortfall": 260.9201388627516,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 1.0,
+      "paid_upper": 266.6985913369862,
+      "paid_lower": 266.6985913086007,
+      "multi_eq_gap": 2.8385500172589673e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 390.3014086913993,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 1.5,
+      "paid_upper": 152.77977187266595,
+      "paid_lower": 152.77977184948716,
+      "multi_eq_gap": 2.317878511348681e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 504.22022815051287,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 2.0,
+      "paid_upper": 84.57552950270237,
+      "paid_lower": 84.57552948426242,
+      "multi_eq_gap": 1.843994823502726e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 572.4244705157375,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 2.5,
+      "paid_upper": 47.51167441375694,
+      "paid_lower": 47.51167439882466,
+      "multi_eq_gap": 1.493228296567395e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 609.4883256011753,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 3.0,
+      "paid_upper": 27.23633871978461,
+      "paid_lower": 27.23633870859178,
+      "multi_eq_gap": 1.1192827997774657e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 629.7636612914082,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 3.5,
+      "paid_upper": 15.875168061711815,
+      "paid_lower": 15.87516805024182,
+      "multi_eq_gap": 1.1469994731783117e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 641.1248319497582,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 1.0,
+      "alpha_fire": 4.0,
+      "paid_upper": 9.367211247086168,
+      "paid_lower": 9.367211236325247,
+      "multi_eq_gap": 1.0760921043129201e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 647.6327887636747,
+      "min_bailout": 91.8
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 0.0,
+      "paid_upper": 514.1975235856395,
+      "paid_lower": 410.6192108817684,
+      "multi_eq_gap": 103.57831270387106,
+      "defaults_lower": 23,
+      "systemic_shortfall": 246.38078911823158,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 0.5,
+      "paid_upper": 317.0052702442977,
+      "paid_lower": 317.0052702277414,
+      "multi_eq_gap": 1.6556327864236664e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 339.9947297722586,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 1.0,
+      "paid_upper": 207.00483281092218,
+      "paid_lower": 207.00483279173426,
+      "multi_eq_gap": 1.91879223621072e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 449.99516720826574,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 1.5,
+      "paid_upper": 120.68816105768394,
+      "paid_lower": 120.68816103976309,
+      "multi_eq_gap": 1.792085413399036e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 536.3118389602369,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 2.0,
+      "paid_upper": 68.4443042018243,
+      "paid_lower": 68.444304189258,
+      "multi_eq_gap": 1.2566289342430537e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 588.555695810742,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 2.5,
+      "paid_upper": 39.114985638334744,
+      "paid_lower": 39.11498562551204,
+      "multi_eq_gap": 1.2822702899484284e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 617.8850143744879,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 3.0,
+      "paid_upper": 22.673535735133694,
+      "paid_lower": 22.673535722626497,
+      "multi_eq_gap": 1.2507197055811048e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 634.3264642773735,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 3.5,
+      "paid_upper": 13.31080643097911,
+      "paid_lower": 13.310806421599024,
+      "multi_eq_gap": 9.380086041232971e-09,
+      "defaults_lower": 23,
+      "systemic_shortfall": 643.6891935784009,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.85,
+      "alpha_fire": 4.0,
+      "paid_upper": 7.890884280923344,
+      "paid_lower": 7.890884272964601,
+      "multi_eq_gap": 7.958742997971058e-09,
+      "defaults_lower": 23,
+      "systemic_shortfall": 649.1091157270354,
+      "min_bailout": 109.22999999999999
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 0.0,
+      "paid_upper": 338.1569972067433,
+      "paid_lower": 338.1569971967503,
+      "multi_eq_gap": 9.993016192311188e-09,
+      "defaults_lower": 23,
+      "systemic_shortfall": 318.8430028032497,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 0.5,
+      "paid_upper": 247.6390561961951,
+      "paid_lower": 247.6390561807562,
+      "multi_eq_gap": 1.54388999362709e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 409.3609438192438,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 1.0,
+      "paid_upper": 158.29207395384145,
+      "paid_lower": 158.29207393880398,
+      "multi_eq_gap": 1.5037471712275874e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 498.707926061196,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 1.5,
+      "paid_upper": 93.3834933852618,
+      "paid_lower": 93.38349337149317,
+      "multi_eq_gap": 1.3768627127319633e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 563.6165066285068,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 2.0,
+      "paid_upper": 53.929602476034006,
+      "paid_lower": 53.92960246311052,
+      "multi_eq_gap": 1.2923486281124497e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 603.0703975368895,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 2.5,
+      "paid_upper": 31.264283639914353,
+      "paid_lower": 31.26428362686699,
+      "multi_eq_gap": 1.3047362301676912e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 625.735716373133,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 3.0,
+      "paid_upper": 18.303412198808132,
+      "paid_lower": 18.303412186880106,
+      "multi_eq_gap": 1.1928026566465633e-08,
+      "defaults_lower": 23,
+      "systemic_shortfall": 638.6965878131199,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 3.5,
+      "paid_upper": 10.81718498734634,
+      "paid_lower": 10.817184978423057,
+      "multi_eq_gap": 8.923283445483321e-09,
+      "defaults_lower": 23,
+      "systemic_shortfall": 646.182815021577,
+      "min_bailout": 126.66000000000001
+    },
+    {
+      "shock_scale": 0.7,
+      "alpha_fire": 4.0,
+      "paid_upper": 6.441275411102127,
+      "paid_lower": 6.4412754019118825,
+      "multi_eq_gap": 9.190244121271007e-09,
+      "defaults_lower": 23,
+      "systemic_shortfall": 650.5587245980881,
+      "min_bailout": 126.66000000000001
+    }
+  ],
+  "searu_cases": [
+    {
+      "name": "ring_network_6.json",
+      "n_banks": 6,
+      "total_obligations": 50.0,
+      "paid_upper": 6.56549605,
+      "paid_lower": 6.56549603,
+      "multi_eq_gap": 2e-08,
+      "defaults_upper": 5,
+      "defaults_lower": 5,
+      "cascade_rounds": 63,
+      "systemic_shortfall": 43.43450397,
+      "min_bailout_total": 3.3,
+      "adv_shock_shortfall": 45.31337563,
+      "adv_shock_amp": 1.00653095
+    },
+    {
+      "name": "ecb_core_periphery_12.json",
+      "n_banks": 12,
+      "total_obligations": 337.0,
+      "paid_upper": 17.50300381,
+      "paid_lower": 17.5030038,
+      "multi_eq_gap": 1e-08,
+      "defaults_upper": 11,
+      "defaults_lower": 11,
+      "cascade_rounds": 62,
+      "systemic_shortfall": 319.4969962,
+      "min_bailout_total": 28.7,
+      "adv_shock_shortfall": 323.02628534,
+      "adv_shock_amp": 1.00144905
+    },
+    {
+      "name": "stress_cascade_24.json",
+      "n_banks": 24,
+      "total_obligations": 657.0,
+      "paid_upper": 17.66533027,
+      "paid_lower": 17.66533026,
+      "multi_eq_gap": 1e-08,
+      "defaults_upper": 23,
+      "defaults_lower": 23,
+      "cascade_rounds": 46,
+      "systemic_shortfall": 639.33466974,
+      "min_bailout_total": 91.8,
+      "adv_shock_shortfall": 641.37264743,
+      "adv_shock_amp": 1.00016016
+    }
+  ],
+  "ms_sweep": [
+    {
+      "K": 2,
+      "efficient_welfare": 4.0,
+      "min_rent_required": 2.0,
+      "max_budget_surplus": 2.0,
+      "norm_surplus_ratio": 0.11111111,
+      "theoretical_formula": 0.11111111,
+      "second_best_welfare": 4.0,
+      "second_best_eff_pct": 100.0,
+      "impossibility_holds": 0,
+      "fast_agree": true
+    },
+    {
+      "K": 3,
+      "efficient_welfare": 10.0,
+      "min_rent_required": 8.0,
+      "max_budget_surplus": 2.0,
+      "norm_surplus_ratio": 0.04166667,
+      "theoretical_formula": 0.04166667,
+      "second_best_welfare": 10.0,
+      "second_best_eff_pct": 100.0,
+      "impossibility_holds": 0,
+      "fast_agree": true
+    },
+    {
+      "K": 4,
+      "efficient_welfare": 20.0,
+      "min_rent_required": 20.0,
+      "max_budget_surplus": 0.0,
+      "norm_surplus_ratio": 0.0,
+      "theoretical_formula": 0.0,
+      "second_best_welfare": 20.0,
+      "second_best_eff_pct": 100.0,
+      "impossibility_holds": 0,
+      "fast_agree": true
+    },
+    {
+      "K": 5,
+      "efficient_welfare": 35.0,
+      "min_rent_required": 40.0,
+      "max_budget_surplus": -5.0,
+      "norm_surplus_ratio": -0.02777778,
+      "theoretical_formula": -0.02777778,
+      "second_best_welfare": 33.33333333,
+      "second_best_eff_pct": 95.23809524,
+      "impossibility_holds": 1,
+      "fast_agree": true
+    },
+    {
+      "K": 6,
+      "efficient_welfare": 56.0,
+      "min_rent_required": 70.0,
+      "max_budget_surplus": -14.0,
+      "norm_surplus_ratio": -0.04761905,
+      "theoretical_formula": -0.04761905,
+      "second_best_welfare": 52.5,
+      "second_best_eff_pct": 93.75,
+      "impossibility_holds": 1,
+      "fast_agree": true
+    },
+    {
+      "K": 7,
+      "efficient_welfare": 84.0,
+      "min_rent_required": 112.0,
+      "max_budget_surplus": -28.0,
+      "norm_surplus_ratio": -0.0625,
+      "theoretical_formula": -0.0625,
+      "second_best_welfare": 78.4,
+      "second_best_eff_pct": 93.33333333,
+      "impossibility_holds": 1,
+      "fast_agree": true
+    },
+    {
+      "K": 8,
+      "efficient_welfare": 120.0,
+      "min_rent_required": 168.0,
+      "max_budget_surplus": -48.0,
+      "norm_surplus_ratio": -0.07407407,
+      "theoretical_formula": -0.07407407,
+      "second_best_welfare": 112.0,
+      "second_best_eff_pct": 93.33333333,
+      "impossibility_holds": 1,
+      "fast_agree": true
+    }
+  ],
+  "certs_verified": "10/10"
+}

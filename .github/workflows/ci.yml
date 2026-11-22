@@ -1,0 +1,57 @@
+name: CI
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: [ main, "feat/**", "refactor/**" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify-econ:
+    name: Formal Zero-FP-Trust Econ, MOT/SOS, DRO, Clearing, VCG & Ring-0 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    steps:
+      - name: Checkout FLOW (main)
+        uses: actions/checkout@v6
+        with:
+          repository: hianova/FLOW
+          ref: main
+          path: FLOW
+
+      - name: Checkout ECON
+        uses: actions/checkout@v6
+        with:
+          path: ECON
+
+      - name: Cache Lean 4 Toolchain
+        uses: actions/cache@v5
+        with:
+          path: ~/.elan
+          key: ${{ runner.os }}-${{ runner.arch }}-elan-lean-4.36.0
+
+      - name: Install Lean 4 Toolchain
+        run: |
+          set -euo pipefail
+          if ! "$HOME/.elan/bin/lean" --version >/dev/null 2>&1; then
+            curl --retry 5 -sSfL https://elan.lean-lang.org/elan-init.sh -o /tmp/elan-init.sh
+            sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.36.0
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Install Clang (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Run All ECON v1.0.0 Formal, Ring-0 & Oracle Gates
+        run: |
+          make -C ECON clean && make -C ECON verify
