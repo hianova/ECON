@@ -88,6 +88,7 @@ static int run_selftest(void) {
     ch5.quotes[2] = (econ_option_quote_t){22700.0, 350.0, 352.0, 549.0, 551.0, 22499.0, 22501.0};
     econ_arb_res_t r5;
     econ_cert_record_t *c5 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c5) { fprintf(stderr, "OOM in run_selftest T05\n"); return 1; }
     econ_arb_scan(&ch5, NULL, &r5, c5);
     int ok5 = (r5.arb_found == 1 && r5.best_mode == 3 && r5.sniper_false_neg >= 1 && c5->arb_edge_int > 0);
     if (ok5) pass++;
@@ -235,6 +236,7 @@ static int run_selftest(void) {
 
     /* T16: Certificate Write + Exact __int128 Independent Verify */
     econ_cert_record_t *c16 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c16) { fprintf(stderr, "OOM in run_selftest T16\n"); return 1; }
     econ_bilateral_ms(6, 1, NULL, &r14b, c16);
     int rc16w = econ_cert_write_json("/tmp/econ_selftest_cert.json", c16);
     int rc16v = econ_cert_verify_file("/tmp/econ_selftest_cert.json", 0);
@@ -286,6 +288,7 @@ static int run_selftest(void) {
     adv19.PH = 45.0; adv19.PL = 15.0; adv19.BH = 75.0; adv19.BL = 0.0;
     econ_adverse_res_t avr19;
     econ_cert_record_t *c19 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c19) { fprintf(stderr, "OOM in run_selftest T19\n"); return 1; }
     econ_adverse_audit(&adv19, 0.15, NULL, &avr19, c19);
     int ok19 = (avr19.screening_valid == 1 && avr19.screened_r_star >= avr19.critical_r_star &&
                 econ_cert_write_json("/tmp/econ_st19.json", c19) == 0 &&
@@ -329,6 +332,7 @@ static int run_selftest(void) {
 
     /* T22: 3D Institutional Weakest-Link Dominance M28/M29 */
     econ_cert_record_t *c22 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c22) { fprintf(stderr, "OOM in run_selftest T22\n"); return 1; }
     c22->has_inst = 1; c22->inst_scale = 10000;
     snprintf(c22->pillar, sizeof(c22->pillar), "inst");
     snprintf(c22->kind, sizeof(c22->kind), "inst");
@@ -352,6 +356,7 @@ static int run_selftest(void) {
     /* T23: Zero-FP Agency + Margin Cert Round-Trip Verification */
     econ_cert_record_t *c23a = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
     econ_cert_record_t *c23b = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c23a || !c23b) { free(c23a); free(c23b); fprintf(stderr, "OOM in run_selftest T23\n"); return 1; }
     econ_agency_audit(&ag17, 0.25, NULL, &ar17b, c23a);
     econ_margin_audit(&mg20, 0.30, -1.0, NULL, &mgr20b, c23b);
     int ok23 = (econ_cert_write_json("/tmp/econ_st23a.json", c23a) == 0 &&
@@ -365,6 +370,7 @@ static int run_selftest(void) {
 
     /* T24: Minimal Institutional Repair Optimality Check M30 */
     econ_cert_record_t *c24 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    if (!c24) { fprintf(stderr, "OOM in run_selftest T24\n"); return 1; }
     c24->has_inst = 1; c24->inst_scale = 10000;
     snprintf(c24->pillar, sizeof(c24->pillar), "inst");
     snprintf(c24->kind, sizeof(c24->kind), "inst");
