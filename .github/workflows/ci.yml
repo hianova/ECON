@@ -54,4 +54,6 @@ jobs:
 
       - name: Run All ECON v2.0.0 Formal, Ring-0, Institutional DRC & Experiment Gates
         run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          make -C FLOW all lean CC=clang CXX=clang++
           make -C ECON clean && make -C ECON verify && make -C ECON experiments

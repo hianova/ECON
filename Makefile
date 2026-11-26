@@ -74,7 +74,10 @@ hygiene-gate: | $(BUILD_DIR)
 
 flow-dep:
 	@test -f "$(FLOW_OLEAN)" && test -f "$(FLOW_OLEAN_DIR)/Flow/Schema.olean" && test -f "$(FLOW_OLEAN_DIR)/Flow/Interval.olean" && test -f "$(FLOW_OLEAN_DIR)/Flow/CholeskySDD.olean" && test -x "$(FLOW_BIN)" || \
-		$(MAKE) -C "$(FLOW_DIR)" all
+		$(MAKE) -C "$(FLOW_DIR)" all lean
+
+$(FLOW_OLEAN):
+	$(MAKE) -C "$(FLOW_DIR)" all lean
 
 $(ECON_OLEAN): Econ.lean $(FLOW_OLEAN) | $(BUILD_DIR) hygiene-gate flow-dep
 	LEAN_PATH="$(FLOW_OLEAN_DIR)" $(LEAN) -DwarningAsError=true -o $@ Econ.lean
