@@ -1,0 +1,15 @@
+# FLOW v10.0.0 ArenaSchema: 64-byte ECON Clearing & Margin Wire Cell
+arena 2 econ_wire build/econ_wire.h econ_wire_cell_t econ_wire_map_t econ_wire_arena_t
+
+layout econ_clear_wire econ_clear_wire_t
+  field assets_q16 0 i64 1
+  field liab_q16 64 i64 1
+  field equity_q16 128 i64 1
+  field haircut_q16 192 i64 1
+  field margin_req_q16 256 i64 1
+  field margin_post_q16 320 i64 1
+  field n_banks 384 u32 1
+  field flags 416 u32 1
+  field seq_u64 448 u64 1
+
+region clearing 0 2 econ_clear_wire ECON_SLOT_CLEARING -

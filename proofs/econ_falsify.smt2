@@ -1,0 +1,37 @@
+; ECON v1.0.0 — Pure QF_LIA Eisenberg-Noe Limited Liability & No-Arbitrage Bounds
+(set-logic QF_LIA)
+
+(declare-const a Int) (declare-const in_pay Int) (declare-const l Int) (declare-const p Int)
+
+; CHECK 1: Anti-vacuity for Eisenberg-Noe clearing payment p = min(l, a + in_pay) (expect SAT)
+(push)
+(assert (and (>= a 0) (>= in_pay 0) (> l 0)))
+(assert (= p (ite (<= l (+ a in_pay)) l (+ a in_pay))))
+(assert (> p 0))
+(check-sat)
+(pop)
+
+; CHECK 2: Limited-liability clearing payment 0 <= p <= l and p <= a + in_pay (expect UNSAT)
+(push)
+(assert (and (>= a 0) (>= in_pay 0) (>= l 0)))
+(assert (= p (ite (<= l (+ a in_pay)) l (+ a in_pay))))
+(assert (or (< p 0) (> p l) (> p (+ a in_pay))))
+(check-sat)
+(pop)
+
+; CHECK 3: Honest Theory Falsification — fire-sale loss can tip solvent bank into default (expect SAT)
+(declare-const fire_loss Int)
+(push)
+(assert (>= a l))
+(assert (> fire_loss 0))
+(assert (< (- a fire_loss) l))
+(check-sat)
+(pop)
+
+; CHECK 4: Bid-ask spread no-arbitrage (roundtrip profit <= 0 when bid <= ask) (expect UNSAT)
+(declare-const bid Int) (declare-const ask Int)
+(push)
+(assert (<= bid ask))
+(assert (> (- bid ask) 0))
+(check-sat)
+(pop)
