@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "econ_cert.h"
+#include "flow_cert_linalg.h"
 #include "flow_cholesky_sdd.h"
 #include "flow_sha256_io.h"
 
@@ -29,49 +30,7 @@ int econ_sha256_file(const char *path, char hex_out[65]) {
  * ============================================================================ */
 
 int econ_lu_solve_real(int n, const double *A, const double *b, double *x) {
-    if (n <= 0 || A == NULL || b == NULL || x == NULL) return -1;
-    size_t nn = (size_t)n;
-    double *M = (double *)malloc(nn * nn * sizeof(double));
-    double *rhs = (double *)malloc(nn * sizeof(double));
-    if (M == NULL || rhs == NULL) {
-        free(M); free(rhs);
-        return -1;
-    }
-    memcpy(M, A, nn * nn * sizeof(double));
-    memcpy(rhs, b, nn * sizeof(double));
-    for (int k = 0; k < n; ++k) {
-        int piv = k;
-        double best = fabs(M[(size_t)k * nn + (size_t)k]);
-        for (int i = k + 1; i < n; ++i) {
-            double v = fabs(M[(size_t)i * nn + (size_t)k]);
-            if (v > best) { best = v; piv = i; }
-        }
-        if (best < 1e-14) { free(M); free(rhs); return -1; }
-        if (piv != k) {
-            for (int j = k; j < n; ++j) {
-                double t = M[(size_t)k * nn + (size_t)j];
-                M[(size_t)k * nn + (size_t)j] = M[(size_t)piv * nn + (size_t)j];
-                M[(size_t)piv * nn + (size_t)j] = t;
-            }
-            double tb = rhs[k]; rhs[k] = rhs[piv]; rhs[piv] = tb;
-        }
-        double diag = M[(size_t)k * nn + (size_t)k];
-        for (int i = k + 1; i < n; ++i) {
-            double fac = M[(size_t)i * nn + (size_t)k] / diag;
-            M[(size_t)i * nn + (size_t)k] = 0.0;
-            for (int j = k + 1; j < n; ++j) {
-                M[(size_t)i * nn + (size_t)j] -= fac * M[(size_t)k * nn + (size_t)j];
-            }
-            rhs[i] -= fac * rhs[k];
-        }
-    }
-    for (int i = n - 1; i >= 0; --i) {
-        double s = rhs[i];
-        for (int j = i + 1; j < n; ++j) s -= M[(size_t)i * nn + (size_t)j] * x[j];
-        x[i] = s / M[(size_t)i * nn + (size_t)i];
-    }
-    free(M); free(rhs);
-    return 0;
+    return flow_lu_solve_real_tol(n, A, b, x, 1e-14);
 }
 
 int econ_sym_jacobi_eigs(int n, const double *A, double *evals, double *evecs) {
@@ -390,62 +349,8 @@ int econ_verify_cholesky_sdd_i64(int n, const int64_t *A_sym,
 
 int econ_cert_cholesky_sdd_i64(int n, const int64_t *A_sym,
                                int64_t *L_out, int64_t *mu_psd_out) {
-    if (n <= 0 || n > ECON_CERT_MAX_DIM || !A_sym || !L_out || !mu_psd_out) return -1;
-    size_t nn = (size_t)n;
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            if (A_sym[(size_t)i * nn + (size_t)j] != A_sym[(size_t)j * nn + (size_t)i]) return -1;
-        }
-    }
-    double A_fp[ECON_CERT_MAX_DIM * ECON_CERT_MAX_DIM];
-    double L_fp[ECON_CERT_MAX_DIM * ECON_CERT_MAX_DIM];
-    double evals[ECON_CERT_MAX_DIM];
-    double max_diag = 0.0;
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            double v = (double)A_sym[(size_t)i * nn + (size_t)j];
-            A_fp[(size_t)i * nn + (size_t)j] = v;
-            if (i == j && fabs(v) > max_diag) max_diag = fabs(v);
-        }
-    }
-    if (econ_sym_jacobi_eigs(n, A_fp, evals, NULL) != 0) return -1;
-    double lmin = evals[0];
-    double eps = fmax(1.0, 1e-7 * (max_diag + 1.0));
-    int chol_ok = 0;
-    for (int attempt = 0; attempt < 8; ++attempt) {
-        double shift = lmin - eps;
-        memset(L_fp, 0, nn * nn * sizeof(double));
-        chol_ok = 1;
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j <= i; ++j) {
-                double s = A_fp[(size_t)i * nn + (size_t)j];
-                if (i == j) s -= shift;
-                for (int k = 0; k < j; ++k) {
-                    s -= L_fp[(size_t)i * nn + (size_t)k] * L_fp[(size_t)j * nn + (size_t)k];
-                }
-                if (i == j) {
-                    if (s <= 0.0) { chol_ok = 0; break; }
-                    L_fp[(size_t)i * nn + (size_t)j] = sqrt(s);
-                } else {
-                    L_fp[(size_t)i * nn + (size_t)j] = s / L_fp[(size_t)j * nn + (size_t)j];
-                }
-            }
-            if (!chol_ok) break;
-        }
-        if (chol_ok) break;
-        eps *= 4.0;
-    }
-    if (!chol_ok) {
-        memset(L_out, 0, nn * nn * sizeof(int64_t));
-    } else {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                L_out[(size_t)i * nn + (size_t)j] =
-                    (j <= i) ? (int64_t)llround(L_fp[(size_t)i * nn + (size_t)j]) : 0;
-            }
-        }
-    }
-    return flow_cholesky_sdd_floor_i64(n, ECON_CERT_MAX_DIM, A_sym, L_out, mu_psd_out);
+    return flow_cert_cholesky_sdd_host_i64(n, ECON_CERT_MAX_DIM, A_sym, L_out, mu_psd_out,
+                                           econ_sym_jacobi_eigs);
 }
 
 /* ============================================================================
