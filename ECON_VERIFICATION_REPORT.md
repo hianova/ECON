@@ -127,3 +127,16 @@ Independent Pure-Stdlib Golden-Oracle Verification & Lean 4 `leanchecker` Audit 
 | CertEconRiskDro | 'CertEconRiskDro.sos_form_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] | PASS |
 | CertEconSniperUpgrade | 'CertEconSniperUpgrade.certified_no_bidask_arbitrage' does not depend on any axioms | PASS |
 
+## 11. Canonical Packed Binary Wire Codec (`ECN2` vs JSON)
+
+| Certificate | Wire vs JSON Size | Decoded Institutional Margin & Digest | Agreement | Status |
+| --- | --- | --- | --- | --- |
+| inst_fund_raw.econcert.json | ECN2=78B (JSON=779B, 10.0x smaller) | M*=(-7400,-34785,-5063)->-34785bps, sha=7b6ce81c5626.. | 0B diff, FNV64=EXACT | PASS |
+| inst_fund_rep.econcert.json | ECN2=73B (JSON=766B, 10.5x smaller) | M*=(13075,8770,7000)->7000bps, sha=3f71a9733d4e.. | 0B diff, FNV64=EXACT | PASS |
+| inst_plat_raw.econcert.json | ECN2=75B (JSON=775B, 10.3x smaller) | M*=(-1700,-4187,-1500)->-4187bps, sha=652683d5b08a.. | 0B diff, FNV64=EXACT | PASS |
+| inst_plat_rep.econcert.json | ECN2=72B (JSON=765B, 10.6x smaller) | M*=(2500,8603,3500)->2500bps, sha=3c1350cbd19e.. | 0B diff, FNV64=EXACT | PASS |
+| inst_exch_raw.econcert.json | ECN2=78B (JSON=781B, 10.0x smaller) | M*=(600,-5473,-19739)->-19739bps, sha=a565c522f5ca.. | 0B diff, FNV64=EXACT | PASS |
+| inst_exch_rep.econcert.json | ECN2=71B (JSON=770B, 10.8x smaller) | M*=(600,5843,1765)->600bps, sha=58e981a350b2.. | 0B diff, FNV64=EXACT | PASS |
+| inst_supp_raw.econcert.json | ECN2=78B (JSON=781B, 10.0x smaller) | M*=(-100,-4644,-17354)->-17354bps, sha=6e9f9775af30.. | 0B diff, FNV64=EXACT | PASS |
+| inst_supp_rep.econcert.json | ECN2=72B (JSON=766B, 10.6x smaller) | M*=(800,8746,872)->800bps, sha=85bffbc2a68f.. | 0B diff, FNV64=EXACT | PASS |
+

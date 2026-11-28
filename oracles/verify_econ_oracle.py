@@ -10,6 +10,7 @@ import json
 import math
 import os
 import subprocess
+import tempfile
 
 
 def run_cli(args: list[str]) -> str:
@@ -413,9 +414,184 @@ def verify_lean_axioms(cert_dir: str) -> list[tuple[str, str, str]]:
     return out_rows
 
 
+def _fnv1a64(data: bytes) -> int:
+    h = 0xCBF29CE484222325
+    for b in data:
+        h ^= b
+        h = (h * 0x00000100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
+
+
+def _read_canonical_varu64(buf: bytes, pos: int, end: int) -> tuple[int, int]:
+    acc = 0
+    shift = 0
+    for i in range(10):
+        assert pos < end, "Truncated varint"
+        b = buf[pos]
+        pos += 1
+        if i == 9:
+            assert b == 1, f"Non-canonical 10th varint byte: {b}"
+            acc |= 1 << 63
+            return acc, pos
+        assert not (i > 0 and b == 0), "Non-canonical trailing zero varint byte"
+        acc |= (b & 0x7F) << shift
+        if (b & 0x80) == 0:
+            return acc, pos
+        shift += 7
+    raise AssertionError("Varint exceeded 10 bytes")
+
+
+def _zigzag_decode(zz: int) -> int:
+    val = (zz >> 1) ^ -(zz & 1)
+    if val >= (1 << 63):
+        val -= 1 << 64
+    return val
+
+
+def verify_ecn2_wire(bench_dir: str, cert_dir: str) -> list[tuple[str, str, str, str, str]]:
+    out_rows = []
+    inst_pairs = [
+        ("inst_fund_raw.econcert.json", "inst_fund_kpi_raw.json"),
+        ("inst_fund_rep.econcert.json", "inst_fund_kpi_repaired.json"),
+        ("inst_plat_raw.econcert.json", "inst_platform_raw.json"),
+        ("inst_plat_rep.econcert.json", "inst_platform_repaired.json"),
+        ("inst_exch_raw.econcert.json", "inst_exchange_margin_raw.json"),
+        ("inst_exch_rep.econcert.json", "inst_exchange_margin_repaired.json"),
+        ("inst_supp_raw.econcert.json", "inst_supply_chain_raw.json"),
+        ("inst_supp_rep.econcert.json", "inst_supply_chain_repaired.json"),
+    ]
+    pillar_certs = [
+        "fin_txo_clean.econcert.json",
+        "clr_ring6.econcert.json",
+        "ag_clawback.econcert.json",
+        "adv_platform.econcert.json",
+        "mgn_perp8.econcert.json",
+    ]
+    weak_map = {"BALANCED": 0, "INC": 1, "DRO": 2, "SYS": 3}
+    status_map = {"VETOED": 0, "CERTIFIED": 1, "ARBITRAGE": 2, "OBSTRUCTION": 3}
+
+    with tempfile.TemporaryDirectory(prefix="econ_wire_") as td:
+        for cert_name, spec_name in inst_pairs:
+            cert_path = os.path.join(cert_dir, cert_name)
+            spec_path = os.path.join(bench_dir, "inst", spec_name)
+            with open(cert_path, "r") as f:
+                cert_rec = json.load(f)
+            json_bytes = os.path.getsize(cert_path)
+
+            bin_from_cert = os.path.join(td, cert_name + ".ecn2")
+            bin_from_spec = os.path.join(td, spec_name + ".ecn2")
+            run_cli(["pack-wire", cert_path, bin_from_cert])
+            run_cli(["pack-wire", spec_path, bin_from_spec])
+
+            raw = open(bin_from_cert, "rb").read()
+            raw_spec = open(bin_from_spec, "rb").read()
+            assert raw == raw_spec, f"ECN2 mismatch between cert and spec for {cert_name}"
+            assert 61 <= len(raw) <= 192, f"ECN2 byte length out of [61, 192]: {len(raw)}"
+            assert raw[:4] == b"ECN2" and raw[4] == 1, f"Bad ECN2 header: {raw[:5]!r}"
+
+            body_len = len(raw) - 8
+            got_tag = int.from_bytes(raw[body_len:], "little")
+            assert got_tag == _fnv1a64(raw[:body_len]), f"ECN2 FNV-1a64 mismatch for {cert_name}"
+
+            pos = 5
+            pillar_id, pos = _read_canonical_varu64(raw, pos, body_len)
+            kind_id, pos = _read_canonical_varu64(raw, pos, body_len)
+            status_code, pos = _read_canonical_varu64(raw, pos, body_len)
+            weak_dim, pos = _read_canonical_varu64(raw, pos, body_len)
+            flags, pos = _read_canonical_varu64(raw, pos, body_len)
+            scale = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            m_inc = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            m_dro = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            m_sys = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            m_star = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            target_bps = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            repair_cost = _zigzag_decode((v := _read_canonical_varu64(raw, pos, body_len))[0]); pos = v[1]
+            metrics = []
+            for _ in range(4):
+                zz, pos = _read_canonical_varu64(raw, pos, body_len)
+                metrics.append(_zigzag_decode(zz))
+            assert pos + 32 == body_len, f"Digest offset mismatch: {pos} + 32 != {body_len}"
+            sha_hex = raw[pos:body_len].hex()
+
+            assert pillar_id == 0 and kind_id == 0
+            assert status_code == status_map[cert_rec["status"]]
+            assert weak_dim == weak_map[cert_rec["inst_weakest"]]
+            assert (flags & 2) != 0 and (flags & 4) != 0
+            assert scale == cert_rec["inst_scale"]
+            assert m_inc == cert_rec["inst_m_inc"]
+            assert m_dro == cert_rec["inst_m_dro"]
+            assert m_sys == cert_rec["inst_m_sys"]
+            assert m_star == cert_rec["inst_master"] == min(m_inc, m_dro, m_sys)
+            assert target_bps == cert_rec["inst_target"]
+            assert repair_cost == cert_rec["inst_repair_cost"]
+            assert metrics[0] == cert_rec["inst_c_inc"]
+            assert metrics[1] == cert_rec["inst_c_dro"]
+            assert metrics[2] == cert_rec["inst_c_sys"]
+            assert sha_hex == cert_rec["input_sha256"]
+
+            unp_json = os.path.join(td, cert_name + ".unpacked.json")
+            run_cli(["unpack-wire", bin_from_cert, "--json", unp_json])
+            with open(unp_json, "r") as f:
+                dec = json.load(f)
+            assert dec["m_star"] == cert_rec["inst_master"]
+            assert dec["sha256"] == cert_rec["input_sha256"]
+            assert dec["wire_bytes"] == len(raw)
+
+            ratio = json_bytes / len(raw)
+            out_rows.append((
+                cert_name,
+                f"ECN2={len(raw)}B (JSON={json_bytes}B, {ratio:.1f}x smaller)",
+                f"M*=({m_inc},{m_dro},{m_sys})->{m_star}bps, sha={sha_hex[:12]}..",
+                "0B diff, FNV64=EXACT",
+                "PASS",
+            ))
+
+        # Representative non-inst pillar certs roundtrip
+        for pc in pillar_certs:
+            p_path = os.path.join(cert_dir, pc)
+            p_bin = os.path.join(td, pc + ".ecn2")
+            run_cli(["pack-wire", p_path, p_bin])
+            raw_p = open(p_bin, "rb").read()
+            assert 61 <= len(raw_p) <= 192 and raw_p[:4] == b"ECN2"
+            p_unp = os.path.join(td, pc + ".unpacked.json")
+            run_cli(["unpack-wire", p_bin, "--json", p_unp])
+            with open(p_path, "r") as f:
+                src_j = json.load(f)
+            with open(p_unp, "r") as f:
+                dec_j = json.load(f)
+            assert dec_j["pillar"] == src_j["pillar"]
+            assert dec_j["kind"] == src_j["kind"]
+            assert dec_j["status"] == src_j["status"]
+            assert dec_j["sha256"] == src_j["input_sha256"]
+
+        # Adversarial wire checks on inst_fund_raw: truncation, trailing byte, bit-flip, non-canonical varint
+        sample_bin = os.path.join(td, "inst_fund_raw.econcert.json.ecn2")
+        sample_raw = open(sample_bin, "rb").read()
+        bad_cases: list[tuple[str, bytes]] = [
+            ("trunc_1", sample_raw[:-1]),
+            ("trunc_hdr", sample_raw[:4]),
+            ("trailing_byte", sample_raw + b"\x00"),
+            ("tamper_body", sample_raw[:8] + bytes([sample_raw[8] ^ 0x01]) + sample_raw[9:]),
+            ("tamper_tag", sample_raw[:-1] + bytes([sample_raw[-1] ^ 0x80])),
+        ]
+        # Non-canonical varint: expand byte 5 (pillar_id=0 -> 0x80,0x00) AND re-seal valid FNV-1a64!
+        nc_body = sample_raw[:5] + b"\x80\x00" + sample_raw[6:-8]
+        nc_tag = _fnv1a64(nc_body).to_bytes(8, "little")
+        bad_cases.append(("non_canonical_varint_valid_fnv", nc_body + nc_tag))
+
+        for bname, bbytes in bad_cases:
+            bp = os.path.join(td, f"bad_{bname}.ecn2")
+            open(bp, "wb").write(bbytes)
+            r_bad = subprocess.run(["./build/econ_cli", "unpack-wire", bp], capture_output=True, text=True)
+            assert r_bad.returncode != 0, f"ECN2 unpack-wire failed to reject {bname}!"
+
+    return out_rows
+
+
 def write_report(report_path: str, fin_rows: list, act_rows: list, clr_rows: list,
                  mech_rows: list, ag_rows: list, adv_rows: list, mgn_rows: list,
-                 inst_rows: list, cert_rows: list, lean_rows: list) -> None:
+                 inst_rows: list, cert_rows: list, lean_rows: list,
+                 wire_rows: list) -> None:
     with open(report_path, "w") as f:
         f.write("# ECON v2.0.0 Verification Report\n\n")
         f.write("Independent Pure-Stdlib Golden-Oracle Verification & Lean 4 `leanchecker` Audit across 8 Pillars (`M1–M30`).\n\n")
@@ -438,6 +614,7 @@ def write_report(report_path: str, fin_rows: list, act_rows: list, clr_rows: lis
         write_tbl("8. Pillar 8 — Unified 3D Commercial Institutional DRC/LVS Audits (M28–M30)", ["Institution Spec", "3D Margins (INC, DRO, SYS)", "Verdict / Weakest / Repair", "Agreement", "Status"], inst_rows)
         write_tbl("9. Zero-FP-Trust `__int128` Certificate Checks", ["Certificate", "Pillar", "Kind", "Status Tag", "Verify"], cert_rows)
         write_tbl("10. Lean 4 Kernel (`leanchecker`) Axiom Audit (`0 sorryAx`, `0 ofReduceBool`)", ["Module", "Axioms", "Status"], lean_rows)
+        write_tbl("11. Canonical Packed Binary Wire Codec (`ECN2` vs JSON)", ["Certificate", "Wire vs JSON Size", "Decoded Institutional Margin & Digest", "Agreement", "Status"], wire_rows)
 
 
 def main() -> None:
@@ -461,9 +638,10 @@ def main() -> None:
     inst_rows = verify_inst(bench_data)
     cert_rows = verify_certs(args.cert_dir)
     lean_rows = verify_lean_axioms(args.cert_dir)
+    wire_rows = verify_ecn2_wire(args.bench_dir, args.cert_dir)
     write_report(args.report, fin_rows, act_rows, clr_rows, mech_rows,
-                 ag_rows, adv_rows, mgn_rows, inst_rows, cert_rows, lean_rows)
-    print(f"  [ORACLE PASS] FIN({len(fin_rows)}) + ACT({len(act_rows)}) + CLR({len(clr_rows)}) + MECH({len(mech_rows)}) + AG({len(ag_rows)}) + ADV({len(adv_rows)}) + MGN({len(mgn_rows)}) + INST({len(inst_rows)}) + CERTS({len(cert_rows)}) + LEAN({len(lean_rows)}) -> {args.report}")
+                 ag_rows, adv_rows, mgn_rows, inst_rows, cert_rows, lean_rows, wire_rows)
+    print(f"  [ORACLE PASS] FIN({len(fin_rows)}) + ACT({len(act_rows)}) + CLR({len(clr_rows)}) + MECH({len(mech_rows)}) + AG({len(ag_rows)}) + ADV({len(adv_rows)}) + MGN({len(mgn_rows)}) + INST({len(inst_rows)}) + CERTS({len(cert_rows)}) + LEAN({len(lean_rows)}) + ECN2({len(wire_rows)}) -> {args.report}")
 
 
 if __name__ == "__main__":

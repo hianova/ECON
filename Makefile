@@ -28,7 +28,7 @@ FLOW_INC_FLAGS := -I"$(FLOW_DIR)/core" -I"$(FLOW_DIR)/sdk"
 
 ECON_CFLAGS  := -std=c17 -O3 -Wall -Wextra -Werror -Wpedantic -Wconversion -Iinclude $(FLOW_INC_FLAGS)
 ECON_LDFLAGS := -lm -pthread
-ECON_HDRS    := include/econ_cert.h include/econ_fin.h include/econ_actuary.h include/econ_clearing.h include/econ_mech.h include/econ_agency.h include/econ_adverse.h include/econ_margin.h include/econ_inst.h
+ECON_HDRS    := include/econ_cert.h include/econ_wire.h include/econ_fin.h include/econ_actuary.h include/econ_clearing.h include/econ_mech.h include/econ_agency.h include/econ_adverse.h include/econ_margin.h include/econ_inst.h
 ECON_SRCS    := src/econ_cert.c src/econ_fin.c src/econ_actuary.c src/econ_clearing.c src/econ_mech.c src/econ_agency.c src/econ_adverse.c src/econ_margin.c src/econ_inst.c
 
 NOGPR_FLAG   := $(shell $(CC) -mgeneral-regs-only -x c -c /dev/null -o /dev/null 2>/dev/null && echo -mgeneral-regs-only)
@@ -67,7 +67,7 @@ hygiene-gate: | $(BUILD_DIR)
 	if [ "$$econ_lines" -gt 150 ]; then echo "ERROR: Econ.lean exceeds 150 lines ($$econ_lines)" >&2; exit 1; fi
 	@! grep -Eq '^[[:space:]]*axiom[[:space:]]|\bsorry\b|native_decide' lean/EconCert.lean || \
 		(echo "ERROR: lean/EconCert.lean contains sorry, axiom, or native_decide!" >&2 && exit 1)
-	@printf '#include "econ_cert.h"\n#include "econ_fin.h"\n#include "econ_actuary.h"\n#include "econ_clearing.h"\n#include "econ_mech.h"\n#include "econ_agency.h"\n#include "econ_adverse.h"\n#include "econ_margin.h"\n#include "econ_inst.h"\nint econ_cpp20_probe(void){ return (int)sizeof(econ_cert_record_t); }\n' | \
+	@printf '#include "econ_cert.h"\n#include "econ_wire.h"\n#include "econ_fin.h"\n#include "econ_actuary.h"\n#include "econ_clearing.h"\n#include "econ_mech.h"\n#include "econ_agency.h"\n#include "econ_adverse.h"\n#include "econ_margin.h"\n#include "econ_inst.h"\nint econ_cpp20_probe(void){ return (int)(sizeof(econ_cert_record_t) + sizeof(econ_wire_cert_t)); }\n' | \
 		$(CXX) -x c++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -Iinclude $(FLOW_INC_FLAGS) -c - -o $(BUILD_DIR)/.cpp_probe.o
 	@rm -f $(BUILD_DIR)/.cpp_probe.o
 	@echo "  [PASS] Hygiene + Thin Econ.lean (<=150 lines, 0 theorems) + C++20 Header Cleanliness"
@@ -93,11 +93,12 @@ $(ECON_ABI_H) $(ECON_FIR): $(ECON_FLOW)
 ring0-gate: hygiene-gate flow-dep $(ECON_FLOW) $(ECON_ABI_H) $(ECON_FIR)
 	@echo "=== [Gate 2] Ring-0 320B FLOW + Pure-GPR Bid-Ask Arbitrage .fir (SNIPER Upgrade) & Silicon Projection ==="
 	@"$(FLOW_BIN)" verify $(ECON_FLOW)
-	@printf '#include "econ_ring0_abi.h"\n#include "flow_ir.h"\nint r0_cpp(void){ return (int)(sizeof(econ_wire_frame_t) + sizeof(econ_manifold_state_t)); }\n' | \
-		$(CXX) -x c++ -std=c++20 -Wall -Wextra -Wpedantic -Werror $(FLOW_INC_FLAGS) -I$(BUILD_DIR) -c - -o $(BUILD_DIR)/.r0_cpp.o
+	@printf '#include "econ_ring0_abi.h"\n#include "econ_wire.h"\n#include "flow_ir.h"\nint r0_cpp(void){ return (int)(sizeof(econ_wire_frame_t) + sizeof(econ_manifold_state_t) + sizeof(econ_wire_cert_t)); }\n' | \
+		$(CXX) -x c++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -Iinclude $(FLOW_INC_FLAGS) -I$(BUILD_DIR) -c - -o $(BUILD_DIR)/.r0_cpp.o
 	@rm -f $(BUILD_DIR)/.r0_cpp.o
 	@printf '%s\n' \
 		'#include "econ_ring0_abi.h"' \
+		'#include "econ_wire.h"' \
 		'#include "flow_ir_io.h"' \
 		'#include <stdio.h>' \
 		'static flow_ir_prog_t g_prog;' \
@@ -108,6 +109,15 @@ ring0-gate: hygiene-gate flow-dep $(ECON_FLOW) $(ECON_ABI_H) $(ECON_FIR)
 		'  uint8_t wire[64]; econ_wire_frame_pack_bytes(wire, &wf);' \
 		'  econ_wire_frame_t wf2 = {0}; econ_wire_frame_unpack_bytes(wire, &wf2);' \
 		'  if (wf2.magic != wf.magic || wf2.strike_q16 != wf.strike_q16 || wf2.seq_no != 9ULL) return 2;' \
+		'  econ_wire_cert_t ec = {0}; ec.pillar_id = ECON_WIRE_PILLAR_INST; ec.kind_id = ECON_WIRE_KIND_INST;' \
+		'  ec.status_code = ECON_WIRE_STATUS_VETOED; ec.weakest_dim = ECON_WIRE_WEAK_DRO;' \
+		'  ec.flags = ECON_WIRE_FLAG_HAS_INST; ec.scale = 10000; ec.m_inc = -7400; ec.m_dro = -34785;' \
+		'  ec.m_sys = -5063; ec.m_star = -34785; ec.target_bps = 500; ec.repair_cost = 6750310;' \
+		'  uint8_t ecn2[ECON_WIRE_MAX_BYTES]; size_t ecn2_len = 0U;' \
+		'  if (econ_wire_encode_cert(&ec, ecn2, sizeof(ecn2), &ecn2_len) != 0) return 9;' \
+		'  econ_wire_cert_t ec_dec = {0};' \
+		'  if (econ_wire_decode_cert(ecn2, ecn2_len, &ec_dec) != 0 || ec_dec.m_star != -34785) return 10;' \
+		'  if (econ_wire_decode_cert(ecn2, ecn2_len - 1U, &ec_dec) == 0) return 11;' \
 		'  if (!flow_ir_load_file(&g_prog, "$(ECON_FIR)", g_buf, sizeof(g_buf))) return 3;' \
 		'  if (!flow_ir_admits_unitary(&g_prog)) return 4;' \
 		'  int64_t Q = FLOW_Q16_ONE;' \
@@ -122,10 +132,10 @@ ring0-gate: hygiene-gate flow-dep $(ECON_FLOW) $(ECON_ABI_H) $(ECON_FIR)
 		'  /* Case C: Genuine Reversal Arbitrage (22500 + 510 - 500 = 22510 > fut_ask=22502 + 2 -> edge=+6) */' \
 		'  uint64_t in_rev[8] = {(uint64_t)(22500*Q), (uint64_t)(510*Q), (uint64_t)(512*Q), (uint64_t)(498*Q), (uint64_t)(500*Q), (uint64_t)(22500*Q), (uint64_t)(22502*Q), (uint64_t)(2*Q)};' \
 		'  if (!flow_ir_eval_u64(&g_prog, in_rev, out) || (int64_t)out[1] != 6 * Q) return 8;' \
-		'  printf("  [ECON-GPR] WireFrame64 64B + econ_bidask_arb.fir 0-ULP Conversion/Reversal/FP PASS\n");' \
+		'  printf("  [ECON-GPR] WireFrame64 64B + ECN2 (%zuB) + econ_bidask_arb.fir 0-ULP PASS\n", ecn2_len);' \
 		'  return 0;' \
 		'}' > $(RING0_GATE_C)
-	@$(CC) $(CFLAGS_GPR) $(FLOW_INC_FLAGS) -I$(BUILD_DIR) -c $(RING0_GATE_C) -o $(RING0_GATE_O)
+	@$(CC) $(CFLAGS_GPR) -Iinclude $(FLOW_INC_FLAGS) -I$(BUILD_DIR) -c $(RING0_GATE_C) -o $(RING0_GATE_O)
 	@! objdump -d $(RING0_GATE_O) | grep -Eq '[[:space:]](blr|br|udiv|sdiv)[[:space:]]' || \
 		(echo "ERROR: Forbidden br/blr/div instruction in econ_ring0_gate.o!" >&2 && exit 1)
 	@! objdump -d $(RING0_GATE_O) | grep -Eq '([[:space:]]|%)(fadd|fsub|fmul|fdiv|scvtf|ucvtf|fcvtzs|fcvtzu|fcmp|fmov)' || \

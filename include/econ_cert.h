@@ -2,6 +2,8 @@
 #ifndef ECON_CERT_H
 #define ECON_CERT_H
 
+#include "econ_wire.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -245,7 +247,9 @@ int econ_verify_cholesky_sdd_i64(int n, const int64_t *A_sym,
 
 /* Canonical .econcert.json writer, reader & independent zero-FP-trust integer verifier */
 int econ_cert_write_json(const char *out_path, const econ_cert_record_t *rec);
+int econ_cert_load_json(const char *cert_path, econ_cert_record_t *out);
 int econ_cert_verify_file(const char *cert_path, int verify_input_hash);
+int econ_cert_to_wire(const econ_cert_record_t *rec, econ_wire_cert_t *wire_out);
 
 /* Standalone Lean 4 module emitter (import EconCert; 0 sorry, 0 native_decide) */
 int econ_cert_emit_lean(const char *out_path, const char *mod_name,

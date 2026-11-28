@@ -1,5 +1,5 @@
-# FLOW v10.0.0 ArenaSchema: 64-byte ECON Clearing & Margin Wire Cell
-arena 2 econ_wire build/econ_wire.h econ_wire_cell_t econ_wire_map_t econ_wire_arena_t
+# FLOW v10.0.0 ArenaSchema: 64-byte ECON Clearing & Institutional Wire Cells
+arena 4 econ_wire build/econ_wire.h econ_wire_cell_t econ_wire_map_t econ_wire_arena_t
 
 layout econ_clear_wire econ_clear_wire_t
   field assets_q16 0 i64 1
@@ -12,4 +12,16 @@ layout econ_clear_wire econ_clear_wire_t
   field flags 416 u32 1
   field seq_u64 448 u64 1
 
+layout econ_inst_wire econ_inst_wire_t
+  field m_inc_bps 0 i64 1
+  field m_dro_bps 64 i64 1
+  field m_sys_bps 128 i64 1
+  field m_star_bps 192 i64 1
+  field target_bps 256 i64 1
+  field repair_cost 320 i64 1
+  field status_flags 384 u32 1
+  field weakest_dim 416 u32 1
+  field fnv1a64_tag 448 u64 1
+
 region clearing 0 2 econ_clear_wire ECON_SLOT_CLEARING -
+region inst_cert 2 2 econ_inst_wire ECON_SLOT_INST -

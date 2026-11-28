@@ -203,7 +203,33 @@ def main() -> None:
         r22["inst_repair_cost"] += 42
         save_and_fail(r22, "t22_inst_cost.json", "T22_INST_REPAIR_COST")
 
-    print("  [TEST_TOOLS PASS] CLI + EconEngine + EconFastSession + 22/22 Tamper-Rejection checks PASS")
+        # ECN2 Packed Wire CLI & SDK roundtrip + tamper/truncation/non-canonical rejection
+        ecn2_bin = os.path.join(tmp, "inst_fund_raw.ecn2")
+        out_msg = eng.pack_wire("benchmarks/inst/inst_fund_kpi_raw.json", ecn2_bin)
+        assert "OK" in out_msg
+        dec = eng.unpack_wire(ecn2_bin)
+        r_ref = load("inst_fund_raw.econcert.json")
+        assert dec["format"] == "ecn2.v1"
+        assert dec["status"] == r_ref["status"]
+        assert dec["m_inc"] == r_ref["inst_m_inc"]
+        assert dec["m_dro"] == r_ref["inst_m_dro"]
+        assert dec["m_sys"] == r_ref["inst_m_sys"]
+        assert dec["m_star"] == r_ref["inst_master"]
+        assert dec["repair_cost"] == r_ref["inst_repair_cost"]
+        assert dec["sha256"] == r_ref["input_sha256"]
+
+        raw_wire = open(ecn2_bin, "rb").read()
+        for bad_tag, bad_bytes in [
+            ("ECN2_TRUNC", raw_wire[:-1]),
+            ("ECN2_TRAILING", raw_wire + b"\x00"),
+            ("ECN2_TAMPER_BODY", raw_wire[:10] + bytes([raw_wire[10] ^ 0x01]) + raw_wire[11:]),
+        ]:
+            bp = os.path.join(tmp, f"{bad_tag}.ecn2")
+            open(bp, "wb").write(bad_bytes)
+            r_bad = subprocess.run(["build/econ_cli", "unpack-wire", bp], capture_output=True, text=True)
+            assert r_bad.returncode != 0, f"unpack-wire failed to reject {bad_tag}"
+
+    print("  [TEST_TOOLS PASS] CLI + EconEngine + EconFastSession + 22/22 Tamper-Rejection + ECN2 Wire checks PASS")
 
 
 if __name__ == "__main__":

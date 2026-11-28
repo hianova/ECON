@@ -142,6 +142,16 @@ class EconEngine:
         res = subprocess.run(args, capture_output=True, text=True)
         return res.returncode == 0
 
+    def pack_wire(self, in_path: str, out_path: str) -> str:
+        res = subprocess.run(
+            [self.cli_path, "pack-wire", in_path, out_path],
+            check=True, capture_output=True, text=True,
+        )
+        return res.stdout
+
+    def unpack_wire(self, in_path: str) -> dict:
+        return self._run_json(["unpack-wire", in_path])
+
 
 class EconFastSession:
     """In-process persistent ctypes clearing & MS session over build/libecon.{dylib,so}."""

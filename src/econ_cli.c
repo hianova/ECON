@@ -33,11 +33,13 @@ static void print_usage(void) {
     printf("  econ_cli margin-audit <mgn.json> [--theta T] [--alpha A] [--json f] [--cert c] [--emit-lean l --name M]\n");
     printf("  econ_cli supply-audit <sc.json> [--tau T] [--searu] [--json f] [--cert c] [--emit-lean l --name M]\n");
     printf("  econ_cli audit-inst <inst.json> [--json f] [--cert c] [--emit-lean l --name M]\n");
+    printf("  econ_cli pack-wire <inst.json|cert.econcert.json> <out.ecn2>\n");
+    printf("  econ_cli unpack-wire <in.ecn2> [--json f]\n");
     printf("  econ_cli bench --dir <bench_dir> --out <bench.json> --cert-dir <certs_dir>\n");
 }
 
 static int run_selftest(void) {
-    int pass = 0, total = 24;
+    int pass = 0, total = 28;
 
     /* T01: SHA-256 NIST KAT */
     char hex[65];
@@ -394,6 +396,125 @@ static int run_selftest(void) {
     if (ok24) pass++;
     printf("  [T24] Minimal Repair & Tamper Trap M30: %s\n", ok24 ? "PASS" : "FAIL");
 
+    /* T25: ECN2 Canonical Packed Wire Codec Roundtrip (VETOED & CERTIFIED) */
+    econ_cert_record_t *c25 = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+    int ok25 = 0;
+    size_t sz25_veto = 0U, sz25_cert = 0U;
+    if (c25) {
+        c25->has_inst = 1; c25->inst_scale = 10000;
+        snprintf(c25->pillar, sizeof(c25->pillar), "inst");
+        snprintf(c25->kind, sizeof(c25->kind), "inst");
+        snprintf(c25->status, sizeof(c25->status), "VETOED");
+        snprintf(c25->input_sha256, sizeof(c25->input_sha256),
+                 "7b6ce81c5626c1558927df6389e1ef8e850fae9c1a80206f926e234a349c5dca");
+        c25->inst_m_inc = -7400; c25->inst_m_dro = -34785; c25->inst_m_sys = -5063;
+        c25->inst_master = -34785; c25->inst_target = 500;
+        c25->inst_c_inc = 100; c25->inst_c_dro = 150; c25->inst_c_sys = 120;
+        c25->inst_d_inc = 7900; c25->inst_d_dro = 35285; c25->inst_d_sys = 5563;
+        c25->inst_repair_cost = 6750310;
+        snprintf(c25->inst_weakest, sizeof(c25->inst_weakest), "DRO");
+
+        econ_wire_cert_t w25a, w25a_dec;
+        uint8_t wire25a[ECON_WIRE_MAX_BYTES];
+        int rc25a = (econ_cert_to_wire(c25, &w25a) == 0 &&
+                     econ_wire_encode_cert(&w25a, wire25a, sizeof(wire25a), &sz25_veto) == 0 &&
+                     econ_wire_decode_cert(wire25a, sz25_veto, &w25a_dec) == 0);
+        char hex25[65];
+        econ_wire_digest32_to_hex(w25a_dec.sha256_digest, hex25);
+        int eq25a = (rc25a && sz25_veto >= ECON_WIRE_MIN_BYTES && sz25_veto <= ECON_WIRE_MAX_BYTES &&
+                     w25a_dec.m_inc == -7400 && w25a_dec.m_dro == -34785 && w25a_dec.m_sys == -5063 &&
+                     w25a_dec.m_star == -34785 && w25a_dec.repair_cost == 6750310 &&
+                     w25a_dec.status_code == ECON_WIRE_STATUS_VETOED &&
+                     w25a_dec.weakest_dim == ECON_WIRE_WEAK_DRO &&
+                     strcmp(hex25, c25->input_sha256) == 0);
+
+        snprintf(c25->status, sizeof(c25->status), "CERTIFIED");
+        c25->inst_m_inc = 13075; c25->inst_m_dro = 8770; c25->inst_m_sys = 7000;
+        c25->inst_master = 7000; c25->inst_d_inc = 0; c25->inst_d_dro = 0; c25->inst_d_sys = 0;
+        c25->inst_repair_cost = 0;
+        snprintf(c25->inst_weakest, sizeof(c25->inst_weakest), "SYS");
+        econ_wire_cert_t w25b, w25b_dec;
+        uint8_t wire25b[ECON_WIRE_MAX_BYTES];
+        int rc25b = (econ_cert_to_wire(c25, &w25b) == 0 &&
+                     econ_wire_encode_cert(&w25b, wire25b, sizeof(wire25b), &sz25_cert) == 0 &&
+                     econ_wire_decode_cert(wire25b, sz25_cert, &w25b_dec) == 0);
+        ok25 = (eq25a && rc25b && w25b_dec.m_star == 7000 &&
+                w25b_dec.status_code == ECON_WIRE_STATUS_CERTIFIED &&
+                w25b_dec.weakest_dim == ECON_WIRE_WEAK_SYS);
+        free(c25);
+    }
+    if (ok25) pass++;
+    printf("  [T25] ECN2 Wire Roundtrip (VETO/CERT) : %s (veto=%zuB, cert=%zuB)\n",
+           ok25 ? "PASS" : "FAIL", sz25_veto, sz25_cert);
+
+    /* T26: ECN2 FNV-1a64 Tamper & Strict Truncation / Trailing Rejection */
+    econ_wire_cert_t w26;
+    memset(&w26, 0, sizeof(w26));
+    w26.pillar_id = ECON_WIRE_PILLAR_INST; w26.kind_id = ECON_WIRE_KIND_INST;
+    w26.status_code = ECON_WIRE_STATUS_CERTIFIED; w26.weakest_dim = ECON_WIRE_WEAK_INC;
+    w26.flags = ECON_WIRE_FLAG_CERTIFIED | ECON_WIRE_FLAG_HAS_INST | ECON_WIRE_FLAG_HAS_SHA256;
+    w26.scale = 10000; w26.m_inc = 600; w26.m_dro = 5843; w26.m_sys = 1765;
+    w26.m_star = 600; w26.target_bps = 500; w26.repair_cost = 0;
+    w26.pillar_metrics[0] = 100; w26.pillar_metrics[1] = 120; w26.pillar_metrics[2] = 200;
+    uint8_t wire26[ECON_WIRE_MAX_BYTES + 4U];
+    size_t sz26 = 0U;
+    int ok26 = (econ_wire_encode_cert(&w26, wire26, ECON_WIRE_MAX_BYTES, &sz26) == 0);
+    econ_wire_cert_t w26_out;
+    for (size_t cut = 0U; cut < sz26 && ok26; ++cut) {
+        if (econ_wire_decode_cert(wire26, cut, &w26_out) == 0) ok26 = 0;
+    }
+    if (ok26) {
+        wire26[sz26] = 0x00U;
+        if (econ_wire_decode_cert(wire26, sz26 + 1U, &w26_out) == 0) ok26 = 0;
+        wire26[6] ^= 0x01U;
+        if (econ_wire_decode_cert(wire26, sz26, &w26_out) == 0) ok26 = 0;
+        wire26[6] ^= 0x01U;
+        wire26[sz26 - 1U] ^= 0x80U;
+        if (econ_wire_decode_cert(wire26, sz26, &w26_out) == 0) ok26 = 0;
+    }
+    if (ok26) pass++;
+    printf("  [T26] ECN2 Tamper & Truncation Trap   : %s\n", ok26 ? "PASS" : "FAIL");
+
+    /* T27: ECN2 Non-Canonical ULEB128 Varint Rejection (Even With Valid FNV64) */
+    uint8_t noncanon27[ECON_WIRE_MAX_BYTES];
+    int ok27 = 0;
+    if (sz26 >= ECON_WIRE_MIN_BYTES) {
+        /* Byte 5 is pillar_id=0 (0x00). Expand to non-canonical 2-byte ULEB128 [0x80, 0x00] and re-seal. */
+        memcpy(noncanon27, wire26, 5U);
+        noncanon27[5] = UINT8_C(0x80);
+        noncanon27[6] = UINT8_C(0x00);
+        size_t tail_body = sz26 - ECON_WIRE_TAG_BYTES - 6U;
+        memcpy(noncanon27 + 7U, wire26 + 6U, tail_body);
+        size_t nc_len = flow_ir_wire_seal_trailer(noncanon27, 7U + tail_body);
+        econ_wire_cert_t w27_out;
+        ok27 = (econ_wire_decode_cert(noncanon27, nc_len, &w27_out) != 0);
+    }
+    if (ok27) pass++;
+    printf("  [T27] ECN2 Non-Canonical Varint Trap  : %s\n", ok27 ? "PASS" : "FAIL");
+
+    /* T28: ECN2 Signed Zigzag Extreme & Invariant Mismatch Trap */
+    econ_wire_cert_t w28 = w26, w28_dec;
+    w28.flags = ECON_WIRE_FLAG_HAS_SHA256;
+    w28.status_code = ECON_WIRE_STATUS_VETOED;
+    w28.weakest_dim = ECON_WIRE_WEAK_BALANCED;
+    w28.pillar_metrics[0] = INT64_MIN;
+    w28.pillar_metrics[1] = INT64_MAX;
+    w28.pillar_metrics[2] = -1;
+    w28.pillar_metrics[3] = 0;
+    uint8_t wire28[ECON_WIRE_MAX_BYTES];
+    size_t sz28 = 0U;
+    int ok28 = (econ_wire_encode_cert(&w28, wire28, sizeof(wire28), &sz28) == 0 &&
+                econ_wire_decode_cert(wire28, sz28, &w28_dec) == 0 &&
+                w28_dec.pillar_metrics[0] == INT64_MIN &&
+                w28_dec.pillar_metrics[1] == INT64_MAX &&
+                w28_dec.pillar_metrics[2] == -1);
+    /* Inconsistent M* must be rejected by encoder */
+    econ_wire_cert_t w28_bad = w26;
+    w28_bad.m_star = 9999;
+    if (econ_wire_encode_cert(&w28_bad, wire28, sizeof(wire28), &sz28) == 0) ok28 = 0;
+    if (ok28) pass++;
+    printf("  [T28] ECN2 Zigzag Extremes & M* Guard : %s\n", ok28 ? "PASS" : "FAIL");
+
     printf("  SELFTEST SUMMARY: %d / %d PASSED\n", pass, total);
     return (pass == total) ? 0 : 1;
 }
@@ -659,6 +780,49 @@ static int run_bench_suite(const char *dir, const char *out_json, const char *ce
     return 0;
 }
 
+static const char *wire_pillar_name(uint32_t id) {
+    if (id == ECON_WIRE_PILLAR_INST) return "inst";
+    if (id == ECON_WIRE_PILLAR_FIN) return "fin";
+    if (id == ECON_WIRE_PILLAR_ACTUARY) return "actuary";
+    if (id == ECON_WIRE_PILLAR_CLEARING) return "clearing";
+    if (id == ECON_WIRE_PILLAR_MECH) return "mech";
+    if (id == ECON_WIRE_PILLAR_AGENCY) return "agency";
+    if (id == ECON_WIRE_PILLAR_ADVERSE) return "adverse";
+    if (id == ECON_WIRE_PILLAR_MARGIN) return "margin";
+    return "unknown";
+}
+
+static const char *wire_kind_name(uint32_t id) {
+    if (id == ECON_WIRE_KIND_INST) return "inst";
+    if (id == ECON_WIRE_KIND_ARB_SCAN) return "arb_scan";
+    if (id == ECON_WIRE_KIND_MOT_SOS) return "mot_sos";
+    if (id == ECON_WIRE_KIND_RISK_DRO) return "risk_dro";
+    if (id == ECON_WIRE_KIND_RUIN_BOUND) return "ruin_bound";
+    if (id == ECON_WIRE_KIND_CLEARING) return "clearing";
+    if (id == ECON_WIRE_KIND_VCG) return "vcg";
+    if (id == ECON_WIRE_KIND_MS_DEFICIT) return "ms_deficit";
+    if (id == ECON_WIRE_KIND_FISHER) return "fisher";
+    if (id == ECON_WIRE_KIND_AGENCY) return "agency";
+    if (id == ECON_WIRE_KIND_ADVERSE) return "adverse";
+    if (id == ECON_WIRE_KIND_MARGIN) return "margin";
+    if (id == ECON_WIRE_KIND_SUPPLY) return "supply";
+    return "unknown";
+}
+
+static const char *wire_status_name(uint32_t id) {
+    if (id == ECON_WIRE_STATUS_CERTIFIED) return "CERTIFIED";
+    if (id == ECON_WIRE_STATUS_ARBITRAGE) return "ARBITRAGE";
+    if (id == ECON_WIRE_STATUS_OBSTRUCTION) return "OBSTRUCTION";
+    return "VETOED";
+}
+
+static const char *wire_weak_name(uint32_t id) {
+    if (id == ECON_WIRE_WEAK_INC) return "INC";
+    if (id == ECON_WIRE_WEAK_DRO) return "DRO";
+    if (id == ECON_WIRE_WEAK_SYS) return "SYS";
+    return "BALANCED";
+}
+
 static void parse_common_flags(int argc, char **argv, int start_idx,
                                const char **json_out, const char **cert_out,
                                const char **lean_out, const char **mod_name) {
@@ -696,6 +860,122 @@ int main(int argc, char **argv) {
             else if (strcmp(argv[i], "--cert-dir") == 0) cdir = argv[++i];
         }
         return (run_bench_suite(dir, out, cdir) == 0) ? 0 : 1;
+    }
+
+    if (strcmp(argv[1], "pack-wire") == 0) {
+        if (argc < 4) {
+            fprintf(stderr, "Usage: econ_cli pack-wire <inst.json|cert.econcert.json> <out.ecn2>\n");
+            return 1;
+        }
+        econ_cert_record_t *wrec = (econ_cert_record_t *)calloc(1, sizeof(econ_cert_record_t));
+        if (!wrec) return 1;
+        int loaded = 0;
+        if (econ_cert_load_json(argv[2], wrec) == 0) {
+            if (econ_cert_verify_file(argv[2], 0) != 0) {
+                fprintf(stderr, "Certificate verification failed before pack-wire: %s\n", argv[2]);
+                free(wrec);
+                return 1;
+            }
+            loaded = 1;
+        } else {
+            econ_inst_spec_t sp;
+            econ_inst_res_t ires;
+            if (econ_parse_inst_spec(argv[2], &sp) == 0 &&
+                econ_audit_institution(&sp, argv[2], &ires, wrec) == 0) {
+                loaded = 1;
+            }
+        }
+        if (!loaded) {
+            fprintf(stderr, "Failed to load certificate or inst spec: %s\n", argv[2]);
+            free(wrec);
+            return 1;
+        }
+        econ_wire_cert_t wire;
+        uint8_t wbuf[ECON_WIRE_MAX_BYTES];
+        size_t wlen = 0U;
+        if (econ_cert_to_wire(wrec, &wire) != 0 ||
+            econ_wire_encode_cert(&wire, wbuf, sizeof(wbuf), &wlen) != 0) {
+            fprintf(stderr, "Failed to encode ECN2 wire payload\n");
+            free(wrec);
+            return 1;
+        }
+        FILE *fb = fopen(argv[3], "wb");
+        if (!fb) {
+            fprintf(stderr, "Cannot open output binary: %s\n", argv[3]);
+            free(wrec);
+            return 1;
+        }
+        size_t wr = fwrite(wbuf, 1U, wlen, fb);
+        fclose(fb);
+        free(wrec);
+        if (wr != wlen) return 1;
+        char hex[65];
+        econ_wire_digest32_to_hex(wire.sha256_digest, hex);
+        printf("[PACK-WIRE] %s -> %s (pillar=%s kind=%s status=%s M=(%" PRId64 ",%" PRId64 ",%" PRId64 ") M*=%" PRId64 " bytes=%zu sha256=%s tag=0x%016" PRIx64 ") OK\n",
+               argv[2], argv[3], wire_pillar_name(wire.pillar_id), wire_kind_name(wire.kind_id),
+               wire_status_name(wire.status_code), wire.m_inc, wire.m_dro, wire.m_sys,
+               wire.m_star, wlen, hex, (uint64_t)wire.tag);
+        return 0;
+    }
+
+    if (strcmp(argv[1], "unpack-wire") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "Usage: econ_cli unpack-wire <in.ecn2> [--json f]\n");
+            return 1;
+        }
+        const char *ujson = NULL;
+        for (int i = 3; i + 1 < argc; ++i) {
+            if (strcmp(argv[i], "--json") == 0) ujson = argv[++i];
+        }
+        FILE *fb = fopen(argv[2], "rb");
+        if (!fb) {
+            fprintf(stderr, "Cannot open input wire binary: %s\n", argv[2]);
+            return 1;
+        }
+        uint8_t wbuf[ECON_WIRE_MAX_BYTES + 16U];
+        size_t rd = fread(wbuf, 1U, sizeof(wbuf), fb);
+        int ferr = ferror(fb);
+        fclose(fb);
+        if (ferr != 0 || rd < (size_t)ECON_WIRE_MIN_BYTES || rd > (size_t)ECON_WIRE_MAX_BYTES) {
+            fprintf(stderr, "Invalid ECN2 wire size: %zu\n", rd);
+            return 1;
+        }
+        econ_wire_cert_t wire;
+        if (econ_wire_decode_cert(wbuf, rd, &wire) != 0) {
+            fprintf(stderr, "ECN2 wire decode/validation failed\n");
+            return 1;
+        }
+        char hex[65];
+        econ_wire_digest32_to_hex(wire.sha256_digest, hex);
+        printf("[UNPACK-WIRE] %s -> pillar=%s kind=%s status=%s weak=%s M=(%" PRId64 ",%" PRId64 ",%" PRId64 ") M*=%" PRId64 " target=%" PRId64 " repair=%" PRId64 " metrics=[%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 "] sha256=%s bytes=%zu tag=0x%016" PRIx64 " OK\n",
+               argv[2], wire_pillar_name(wire.pillar_id), wire_kind_name(wire.kind_id),
+               wire_status_name(wire.status_code), wire_weak_name(wire.weakest_dim),
+               wire.m_inc, wire.m_dro, wire.m_sys, wire.m_star,
+               wire.target_bps, wire.repair_cost,
+               wire.pillar_metrics[0], wire.pillar_metrics[1],
+               wire.pillar_metrics[2], wire.pillar_metrics[3],
+               hex, rd, (uint64_t)wire.tag);
+        if (ujson) {
+            FILE *fp = fopen(ujson, "wb");
+            if (!fp) return 1;
+            fprintf(fp,
+                    "{\"format\": \"ecn2.v1\", \"pillar\": \"%s\", \"kind\": \"%s\", "
+                    "\"status\": \"%s\", \"weakest\": \"%s\", \"flags\": %u, \"scale\": %" PRId64 ", "
+                    "\"m_inc\": %" PRId64 ", \"m_dro\": %" PRId64 ", \"m_sys\": %" PRId64 ", "
+                    "\"m_star\": %" PRId64 ", \"target_bps\": %" PRId64 ", \"repair_cost\": %" PRId64 ", "
+                    "\"pillar_metrics\": [%" PRId64 ", %" PRId64 ", %" PRId64 ", %" PRId64 "], "
+                    "\"sha256\": \"%s\", \"wire_bytes\": %zu, \"tag_hex\": \"0x%016" PRIx64 "\"}\n",
+                    wire_pillar_name(wire.pillar_id), wire_kind_name(wire.kind_id),
+                    wire_status_name(wire.status_code), wire_weak_name(wire.weakest_dim),
+                    wire.flags, wire.scale,
+                    wire.m_inc, wire.m_dro, wire.m_sys, wire.m_star,
+                    wire.target_bps, wire.repair_cost,
+                    wire.pillar_metrics[0], wire.pillar_metrics[1],
+                    wire.pillar_metrics[2], wire.pillar_metrics[3],
+                    hex, rd, (uint64_t)wire.tag);
+            fclose(fp);
+        }
+        return 0;
     }
 
     const char *json_out = NULL, *cert_out = NULL, *lean_out = NULL, *mod_name = "CertEcon";

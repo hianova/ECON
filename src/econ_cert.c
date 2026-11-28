@@ -1616,3 +1616,259 @@ int econ_cert_emit_lean(const char *out_path, const char *mod_name,
     fclose(fp);
     return 0;
 }
+
+int econ_cert_load_json(const char *cert_path, econ_cert_record_t *out) {
+    if (!cert_path || !out) return -1;
+    FILE *fp = fopen(cert_path, "rb");
+    if (!fp) return -1;
+    if (fseek(fp, 0, SEEK_END) != 0) { fclose(fp); return -1; }
+    long sz = ftell(fp);
+    if (sz <= 0 || sz > 8L * 1024L * 1024L) { fclose(fp); return -1; }
+    rewind(fp);
+    char *buf = (char *)malloc((size_t)sz + 1U);
+    if (!buf) { fclose(fp); return -1; }
+    size_t nr = fread(buf, 1U, (size_t)sz, fp);
+    fclose(fp);
+    buf[nr] = '\0';
+
+    char fmt[32];
+    if (json_get_str(buf, "format", fmt, sizeof(fmt)) != 0 ||
+        strcmp(fmt, "econcert.v1") != 0) {
+        free(buf);
+        return -1;
+    }
+
+    memset(out, 0, sizeof(*out));
+    if (json_get_str(buf, "pillar", out->pillar, sizeof(out->pillar)) != 0 ||
+        json_get_str(buf, "kind", out->kind, sizeof(out->kind)) != 0 ||
+        json_get_str(buf, "status", out->status, sizeof(out->status)) != 0 ||
+        json_get_str(buf, "input_path", out->input_path, sizeof(out->input_path)) != 0 ||
+        json_get_str(buf, "input_sha256", out->input_sha256, sizeof(out->input_sha256)) != 0) {
+        free(buf);
+        return -1;
+    }
+
+    int64_t tmp = 0;
+    if (json_get_i64(buf, "has_inst", &tmp) == 0 && tmp != 0) {
+        out->has_inst = 1;
+        if (json_get_i64(buf, "inst_scale", &out->inst_scale) != 0 ||
+            json_get_i64(buf, "inst_m_inc", &out->inst_m_inc) != 0 ||
+            json_get_i64(buf, "inst_m_dro", &out->inst_m_dro) != 0 ||
+            json_get_i64(buf, "inst_m_sys", &out->inst_m_sys) != 0 ||
+            json_get_i64(buf, "inst_master", &out->inst_master) != 0 ||
+            json_get_i64(buf, "inst_target", &out->inst_target) != 0 ||
+            json_get_i64(buf, "inst_c_inc", &out->inst_c_inc) != 0 ||
+            json_get_i64(buf, "inst_c_dro", &out->inst_c_dro) != 0 ||
+            json_get_i64(buf, "inst_c_sys", &out->inst_c_sys) != 0 ||
+            json_get_i64(buf, "inst_d_inc", &out->inst_d_inc) != 0 ||
+            json_get_i64(buf, "inst_d_dro", &out->inst_d_dro) != 0 ||
+            json_get_i64(buf, "inst_d_sys", &out->inst_d_sys) != 0 ||
+            json_get_i64(buf, "inst_repair_cost", &out->inst_repair_cost) != 0 ||
+            json_get_str(buf, "inst_weakest", out->inst_weakest, sizeof(out->inst_weakest)) != 0) {
+            free(buf);
+            return -1;
+        }
+    }
+    if (json_get_i64(buf, "has_bracket", &tmp) == 0 && tmp != 0) {
+        out->has_bracket = 1;
+        (void)json_get_i64(buf, "bracket_scale", &out->bracket_scale);
+        (void)json_get_i64(buf, "lb_int", &out->lb_int);
+        (void)json_get_i64(buf, "ub_int", &out->ub_int);
+    }
+    if (json_get_i64(buf, "has_arb", &tmp) == 0 && tmp != 0) {
+        out->has_arb = 1;
+        int64_t am = 0;
+        if (json_get_i64(buf, "arb_mode", &am) == 0) out->arb_mode = (int)am;
+        (void)json_get_i64(buf, "arb_scale", &out->arb_scale);
+        (void)json_get_i64(buf, "arb_cost_int", &out->arb_cost_int);
+        (void)json_get_i64(buf, "arb_edge_int", &out->arb_edge_int);
+        (void)json_get_i64(buf, "sniper_mid_res_int", &out->sniper_mid_res_int);
+    }
+    if (json_get_i64(buf, "has_mot", &tmp) == 0 && tmp != 0) {
+        out->has_mot = 1;
+        (void)json_get_i64(buf, "mot_scale", &out->mot_scale);
+        (void)json_get_i64(buf, "mot_frechet_lb_int", &out->mot_frechet_lb_int);
+        (void)json_get_i64(buf, "mot_lb_int", &out->mot_lb_int);
+        (void)json_get_i64(buf, "mot_ub_int", &out->mot_ub_int);
+        (void)json_get_i64(buf, "mot_frechet_ub_int", &out->mot_frechet_ub_int);
+    }
+    if (json_get_i64(buf, "has_dro", &tmp) == 0 && tmp != 0) {
+        out->has_dro = 1;
+        (void)json_get_i64(buf, "dro_scale", &out->dro_scale);
+        (void)json_get_i64(buf, "gauss_cvar_int", &out->gauss_cvar_int);
+        (void)json_get_i64(buf, "dro_cvar_int", &out->dro_cvar_int);
+        (void)json_get_i64(buf, "amp_bps", &out->amp_bps);
+        if (json_get_i64(buf, "has_cantelli", &tmp) == 0 && tmp != 0) {
+            out->has_cantelli = 1;
+            (void)json_get_i64(buf, "cantelli_ptail", &out->cantelli_ptail);
+        }
+    }
+    if (json_get_i64(buf, "has_clearing", &tmp) == 0 && tmp != 0) {
+        out->has_clearing = 1;
+        int64_t nb = 0, hb = 0;
+        if (json_get_i64(buf, "clear_n_banks", &nb) == 0) out->clear_n_banks = (int)nb;
+        if (json_get_i64(buf, "clear_has_bailout", &hb) == 0) out->clear_has_bailout = (int)hb;
+        (void)json_get_i64(buf, "clear_scale", &out->clear_scale);
+    }
+    if (json_get_i64(buf, "has_mech", &tmp) == 0 && tmp != 0) {
+        out->has_mech = 1;
+        int64_t mm = 0;
+        if (json_get_i64(buf, "mech_mode", &mm) == 0) out->mech_mode = (int)mm;
+        (void)json_get_i64(buf, "mech_scale", &out->mech_scale);
+        (void)json_get_i64(buf, "mech_welfare_int", &out->mech_welfare_int);
+        (void)json_get_i64(buf, "mech_revenue_int", &out->mech_revenue_int);
+        (void)json_get_i64(buf, "mech_ms_surplus_int", &out->mech_ms_surplus_int);
+    }
+    if (json_get_i64(buf, "has_agency", &tmp) == 0 && tmp != 0) {
+        out->has_agency = 1;
+        (void)json_get_i64(buf, "ag_alpha", &out->ag_alpha);
+        (void)json_get_i64(buf, "ag_beta", &out->ag_beta);
+        (void)json_get_i64(buf, "ag_ic_margin", &out->ag_ic_margin);
+        (void)json_get_i64(buf, "ag_S2_risk", &out->ag_S2_risk);
+    }
+    if (json_get_i64(buf, "has_adverse", &tmp) == 0 && tmp != 0) {
+        out->has_adverse = 1;
+        int64_t keq = 0, hscr = 0;
+        if (json_get_i64(buf, "adv_k_eq", &keq) == 0) out->adv_k_eq = (int)keq;
+        if (json_get_i64(buf, "adv_has_screen", &hscr) == 0) out->adv_has_screen = (int)hscr;
+        (void)json_get_i64(buf, "adv_scale", &out->adv_scale);
+        (void)json_get_i64(buf, "adv_r", &out->adv_r);
+        (void)json_get_i64(buf, "adv_r_star", &out->adv_r_star);
+    }
+    if (json_get_i64(buf, "has_margin", &tmp) == 0 && tmp != 0) {
+        out->has_margin = 1;
+        int64_t na = 0;
+        if (json_get_i64(buf, "mgn_n_accts", &na) == 0) out->mgn_n_accts = (int)na;
+        (void)json_get_i64(buf, "mgn_scale", &out->mgn_scale);
+        (void)json_get_i64(buf, "mgn_theta", &out->mgn_theta);
+        (void)json_get_i64(buf, "mgn_P_eq", &out->mgn_P_eq);
+        (void)json_get_i64(buf, "mgn_bad_debt", &out->mgn_bad_debt);
+    }
+
+    free(buf);
+    return 0;
+}
+
+int econ_cert_to_wire(const econ_cert_record_t *rec, econ_wire_cert_t *wire_out) {
+    if (!rec || !wire_out) return -1;
+    memset(wire_out, 0, sizeof(*wire_out));
+
+    if (strcmp(rec->pillar, "inst") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_INST;
+    else if (strcmp(rec->pillar, "fin") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_FIN;
+    else if (strcmp(rec->pillar, "actuary") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_ACTUARY;
+    else if (strcmp(rec->pillar, "clearing") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_CLEARING;
+    else if (strcmp(rec->pillar, "mech") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_MECH;
+    else if (strcmp(rec->pillar, "agency") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_AGENCY;
+    else if (strcmp(rec->pillar, "adverse") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_ADVERSE;
+    else if (strcmp(rec->pillar, "margin") == 0) wire_out->pillar_id = ECON_WIRE_PILLAR_MARGIN;
+    else return -1;
+
+    if (strcmp(rec->kind, "inst") == 0) wire_out->kind_id = ECON_WIRE_KIND_INST;
+    else if (strcmp(rec->kind, "arb_scan") == 0) wire_out->kind_id = ECON_WIRE_KIND_ARB_SCAN;
+    else if (strcmp(rec->kind, "mot_sos") == 0) wire_out->kind_id = ECON_WIRE_KIND_MOT_SOS;
+    else if (strcmp(rec->kind, "risk_dro") == 0) wire_out->kind_id = ECON_WIRE_KIND_RISK_DRO;
+    else if (strcmp(rec->kind, "ruin_bound") == 0) wire_out->kind_id = ECON_WIRE_KIND_RUIN_BOUND;
+    else if (strcmp(rec->kind, "clearing") == 0) wire_out->kind_id = ECON_WIRE_KIND_CLEARING;
+    else if (strcmp(rec->kind, "vcg") == 0) wire_out->kind_id = ECON_WIRE_KIND_VCG;
+    else if (strcmp(rec->kind, "ms_deficit") == 0) wire_out->kind_id = ECON_WIRE_KIND_MS_DEFICIT;
+    else if (strcmp(rec->kind, "fisher") == 0) wire_out->kind_id = ECON_WIRE_KIND_FISHER;
+    else if (strcmp(rec->kind, "agency") == 0) wire_out->kind_id = ECON_WIRE_KIND_AGENCY;
+    else if (strcmp(rec->kind, "adverse") == 0) wire_out->kind_id = ECON_WIRE_KIND_ADVERSE;
+    else if (strcmp(rec->kind, "margin") == 0) wire_out->kind_id = ECON_WIRE_KIND_MARGIN;
+    else if (strcmp(rec->kind, "supply") == 0) wire_out->kind_id = ECON_WIRE_KIND_SUPPLY;
+    else return -1;
+
+    if (strcmp(rec->status, "CERTIFIED") == 0) {
+        wire_out->status_code = ECON_WIRE_STATUS_CERTIFIED;
+        wire_out->flags |= ECON_WIRE_FLAG_CERTIFIED;
+    } else if (strcmp(rec->status, "ARBITRAGE") == 0) {
+        wire_out->status_code = ECON_WIRE_STATUS_ARBITRAGE;
+    } else if (strcmp(rec->status, "OBSTRUCTION") == 0) {
+        wire_out->status_code = ECON_WIRE_STATUS_OBSTRUCTION;
+    } else {
+        wire_out->status_code = ECON_WIRE_STATUS_VETOED;
+    }
+
+    if (econ_wire_hex_to_digest32(rec->input_sha256, wire_out->sha256_digest) == 0) {
+        wire_out->flags |= ECON_WIRE_FLAG_HAS_SHA256;
+    } else {
+        memset(wire_out->sha256_digest, 0, sizeof(wire_out->sha256_digest));
+    }
+
+    if (rec->has_inst) {
+        wire_out->flags |= ECON_WIRE_FLAG_HAS_INST;
+        wire_out->scale = (rec->inst_scale > 0) ? rec->inst_scale : 10000;
+        wire_out->m_inc = rec->inst_m_inc;
+        wire_out->m_dro = rec->inst_m_dro;
+        wire_out->m_sys = rec->inst_m_sys;
+        wire_out->m_star = rec->inst_master;
+        wire_out->target_bps = rec->inst_target;
+        wire_out->repair_cost = rec->inst_repair_cost;
+        if (strcmp(rec->inst_weakest, "INC") == 0) wire_out->weakest_dim = ECON_WIRE_WEAK_INC;
+        else if (strcmp(rec->inst_weakest, "DRO") == 0) wire_out->weakest_dim = ECON_WIRE_WEAK_DRO;
+        else if (strcmp(rec->inst_weakest, "SYS") == 0) wire_out->weakest_dim = ECON_WIRE_WEAK_SYS;
+        else wire_out->weakest_dim = ECON_WIRE_WEAK_BALANCED;
+        wire_out->pillar_metrics[0] = rec->inst_c_inc;
+        wire_out->pillar_metrics[1] = rec->inst_c_dro;
+        wire_out->pillar_metrics[2] = rec->inst_c_sys;
+        wire_out->pillar_metrics[3] = rec->inst_d_inc + rec->inst_d_dro + rec->inst_d_sys;
+    } else {
+        wire_out->weakest_dim = ECON_WIRE_WEAK_BALANCED;
+        wire_out->scale = 10000;
+        if (rec->has_arb) {
+            wire_out->scale = (rec->arb_scale > 0) ? rec->arb_scale : 100;
+            wire_out->pillar_metrics[0] = (int64_t)rec->arb_mode;
+            wire_out->pillar_metrics[1] = rec->arb_edge_int;
+            wire_out->pillar_metrics[2] = rec->arb_cost_int;
+            wire_out->pillar_metrics[3] = rec->sniper_mid_res_int;
+        } else if (rec->has_mot) {
+            wire_out->scale = (rec->mot_scale > 0) ? rec->mot_scale : 1000;
+            wire_out->pillar_metrics[0] = rec->mot_frechet_lb_int;
+            wire_out->pillar_metrics[1] = rec->mot_lb_int;
+            wire_out->pillar_metrics[2] = rec->mot_ub_int;
+            wire_out->pillar_metrics[3] = rec->mot_frechet_ub_int;
+        } else if (rec->has_dro) {
+            wire_out->scale = (rec->dro_scale > 0) ? rec->dro_scale : 1000;
+            wire_out->pillar_metrics[0] = rec->gauss_cvar_int;
+            wire_out->pillar_metrics[1] = rec->dro_cvar_int;
+            wire_out->pillar_metrics[2] = rec->amp_bps;
+            wire_out->pillar_metrics[3] = rec->has_cantelli ? rec->cantelli_ptail : 0;
+        } else if (rec->has_clearing) {
+            wire_out->scale = (rec->clear_scale > 0) ? rec->clear_scale : 10000;
+            wire_out->pillar_metrics[0] = (int64_t)rec->clear_n_banks;
+            wire_out->pillar_metrics[1] = rec->has_bracket ? rec->lb_int : 0;
+            wire_out->pillar_metrics[2] = rec->has_bracket ? rec->ub_int : 0;
+            wire_out->pillar_metrics[3] = (int64_t)rec->clear_has_bailout;
+        } else if (rec->has_mech) {
+            wire_out->scale = (rec->mech_scale > 0) ? rec->mech_scale : 10000;
+            wire_out->pillar_metrics[0] = (int64_t)rec->mech_mode;
+            wire_out->pillar_metrics[1] = rec->mech_welfare_int;
+            wire_out->pillar_metrics[2] = rec->mech_revenue_int;
+            wire_out->pillar_metrics[3] = rec->mech_ms_surplus_int;
+        } else if (rec->has_agency) {
+            wire_out->pillar_metrics[0] = rec->ag_alpha;
+            wire_out->pillar_metrics[1] = rec->ag_beta;
+            wire_out->pillar_metrics[2] = rec->ag_ic_margin;
+            wire_out->pillar_metrics[3] = rec->ag_S2_risk;
+        } else if (rec->has_adverse) {
+            wire_out->scale = (rec->adv_scale > 0) ? rec->adv_scale : 10000;
+            wire_out->pillar_metrics[0] = (int64_t)rec->adv_k_eq;
+            wire_out->pillar_metrics[1] = rec->adv_r;
+            wire_out->pillar_metrics[2] = rec->adv_r_star;
+            wire_out->pillar_metrics[3] = (int64_t)rec->adv_has_screen;
+        } else if (rec->has_margin) {
+            wire_out->scale = (rec->mgn_scale > 0) ? rec->mgn_scale : 10000;
+            wire_out->pillar_metrics[0] = (int64_t)rec->mgn_n_accts;
+            wire_out->pillar_metrics[1] = rec->mgn_theta;
+            wire_out->pillar_metrics[2] = rec->mgn_P_eq;
+            wire_out->pillar_metrics[3] = rec->mgn_bad_debt;
+        } else if (rec->has_bracket) {
+            wire_out->scale = (rec->bracket_scale > 0) ? rec->bracket_scale : 1000;
+            wire_out->pillar_metrics[0] = rec->lb_int;
+            wire_out->pillar_metrics[1] = rec->ub_int;
+        }
+    }
+
+    wire_out->tag = econ_wire_compute_tag(wire_out);
+    return econ_wire__validate_cert(wire_out);
+}
